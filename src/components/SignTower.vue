@@ -104,7 +104,10 @@ onMounted(() => {
     0 0 26px var(--c);
 }
 
+/* A touch of white, like a tube's hot core, keeps the small label readable through the resting
+   dim (pink was 4.47:1 at rest; now 5.3:1, every colour ≥ 4.5:1 lit or at rest). */
 .label {
+  color: color-mix(in srgb, var(--c), #fff 15%);
   writing-mode: vertical-rl;
   font-family: var(--font-neon);
   font-weight: 700;

@@ -4,7 +4,8 @@ import { profile } from '@/content/profile'
 
 // GitHub, LinkedIn, Download CV. GitHub is pinned as the amber primary action (owner's choice);
 // if it ever has no URL, the first live link takes over so there is always a working next step.
-// Links whose target doesn't exist yet render last, as disabled "soon" items instead of broken links.
+// Links whose target doesn't exist yet are left out (no "soon" placeholders in the hero), and
+// appear on their own once profile.ts gives them a URL.
 
 defineProps<{ layout?: 'stack' | 'row' }>()
 
@@ -18,19 +19,17 @@ const actions = computed(() => {
     { key: 'linkedin', label: 'LinkedIn', href: profile.links.linkedin, external: true },
     { key: 'cv', label: 'Download CV', href: profile.cvUrl, download: true },
   ]
-  return [...all.filter((a) => a.href), ...all.filter((a) => !a.href)]
+  return all.filter((a): a is Action & { href: string } => !!a.href)
 })
 const primaryKey = computed(
   () => actions.value.find((a) => a.key === PRIMARY && a.href)?.key ?? actions.value.find((a) => a.href)?.key,
 )
-const soonLabel: Record<string, string> = { cv: 'CV · soon', linkedin: 'LinkedIn · soon', github: 'GitHub · soon' }
 </script>
 
 <template>
   <div class="actions" :class="layout ?? 'row'">
     <template v-for="a in actions" :key="a.key">
       <a
-        v-if="a.href"
         class="btn"
         :class="{ primary: a.key === primaryKey }"
         :href="a.href"
@@ -42,7 +41,6 @@ const soonLabel: Record<string, string> = { cv: 'CV · soon', linkedin: 'LinkedI
         {{ a.label }}
         <svg v-if="a.external" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
       </a>
-      <span v-else class="btn soon" aria-disabled="true">{{ soonLabel[a.key] }}</span>
     </template>
   </div>
 </template>
@@ -115,23 +113,6 @@ a.btn {
 .btn.primary:hover {
   background: var(--color-action-hover);
   color: var(--color-action-ink);
-}
-
-/* Not available yet: one dashed edge, muted, not interactive. */
-.btn.soon {
-  height: 40px;
-  padding: 0 16px;
-  font-size: 14px;
-  color: var(--color-faint);
-  box-shadow: none;
-  border: 1px dashed var(--color-rule-strong);
-  cursor: not-allowed;
-}
-.btn.soon:hover {
-  color: var(--color-faint);
-}
-.btn.soon:active {
-  transform: none;
 }
 
 @media (max-width: 959px) {
