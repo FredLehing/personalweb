@@ -68,3 +68,8 @@ __screenshots__/
 **/.impeccable/live/deferred-svelte-component-accepts.json
 **/.impeccable/live/*.png
 # impeccable-ignore-end
+
+# Design process notes (local only)
+.impeccable/
+PRODUCT.md
+DESIGN.md
