@@ -69,6 +69,9 @@ const soonLabel: Record<string, string> = { cv: 'CV · soon', linkedin: 'LinkedI
   font-weight: 600;
   color: var(--color-ink);
   text-decoration: none;
+  /* Night fill, so the skyline (antennas, aircraft lights) never shows through a button
+     and reads as part of it. */
+  background: rgb(11 14 26 / 0.92);
   box-shadow: inset 0 0 0 1px var(--color-rule-strong);
   transition:
     background 0.3s var(--ease-out-expo),
