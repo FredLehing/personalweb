@@ -1,1 +1,96 @@
 @import "tailwindcss";
+
+/* Tokens: a rainy Tokyo night. Glow belongs to the five neon colours only; amber is the action colour.
+   `static` keeps every token in the output: the neon colours are referenced dynamically (var(--color-neon-*)). */
+@theme static {
+  --color-night: #0b0e1a;
+  --color-sky: #121731;
+  --color-far: #161b30;
+  --color-mid: #1b2138;
+  --color-tower: #0f1322;
+  --color-sign: #0e111c;
+  --color-sign-frame: #080a12;
+  --color-ink: #eef0f6;
+  --color-muted: #a7adbd;
+  --color-faint: #8c93a6;
+  --color-rule: #252b40;
+  --color-rule-strong: #3a4156;
+  --color-stop: #4a5269;
+
+  --color-neon-pink: #ff4fa3;
+  --color-neon-cyan: #3fe0e8;
+  --color-neon-amber: #ffb547;
+  --color-neon-violet: #a98bff;
+  --color-neon-lime: #b8ff6a;
+
+  --color-action: #ffb547;
+  --color-action-hover: #ffc870;
+  --color-action-ink: #1a1003;
+
+  --font-neon: "Zen Kaku Gothic New", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Familjen Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  /* Width of the fixed Fred Line rail on wide screens (0 on narrow ones, where it becomes a bottom bar). */
+  --rail: 0px;
+  --line-bar: 64px;
+  --gutter: clamp(16px, 4.4vw, 64px);
+  color-scheme: dark;
+}
+
+@media (min-width: 960px) {
+  :root {
+    --rail: 112px;
+    --line-bar: 0px;
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+    scrollbar-color: var(--color-rule-strong) var(--color-night);
+  }
+
+  body {
+    min-height: 100svh;
+    padding-bottom: var(--line-bar);
+  }
+
+  ::selection {
+    background: var(--color-action);
+    color: var(--color-action-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-action);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
