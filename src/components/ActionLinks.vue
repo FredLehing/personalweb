@@ -104,6 +104,11 @@ a.btn {
   color: var(--color-action-ink);
   box-shadow: none;
 }
+/* Amber-on-amber would vanish, so selected text on the amber button glows dark instead. */
+.btn.primary::selection {
+  color: var(--color-action-ink);
+  text-shadow: 0 0 8px rgb(0 0 0 / 0.35);
+}
 .btn.primary:hover {
   background: var(--color-action-hover);
   color: var(--color-action-ink);

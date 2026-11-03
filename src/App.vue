@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { profile } from '@/content/profile'
-import { stations } from '@/content/stations'
+import { neonVar, stations } from '@/content/stations'
 import RouteLine from '@/components/RouteLine.vue'
 import SignTower from '@/components/SignTower.vue'
 import SkylineArt from '@/components/SkylineArt.vue'
 import ActionLinks from '@/components/ActionLinks.vue'
+import ContactLinks from '@/components/ContactLinks.vue'
 import ChapterSection from '@/components/ChapterSection.vue'
 import ExperienceList from '@/components/ExperienceList.vue'
 
@@ -15,6 +17,19 @@ const [about, work, dream, contact] = stations as [
   (typeof stations)[number],
 ]
 const year = new Date().getFullYear()
+
+// The street reflection is as wide as the sign. The tower column is sized by the sign, so its width is the sign's.
+const tower = ref<HTMLElement | null>(null)
+const signWidth = ref(0)
+let observer: ResizeObserver | undefined
+onMounted(() => {
+  if (!tower.value) return
+  observer = new ResizeObserver(([entry]) => {
+    if (entry) signWidth.value = entry.contentRect.width
+  })
+  observer.observe(tower.value)
+})
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <template>
@@ -34,7 +49,7 @@ const year = new Date().getFullYear()
           </p>
         </div>
 
-        <div class="tower">
+        <div ref="tower" class="tower">
           <SignTower />
         </div>
 
@@ -44,9 +59,10 @@ const year = new Date().getFullYear()
         </div>
       </div>
 
-      <!-- Wet street at the foot of the skyline, catching the colours of the tower's signs. -->
+      <!-- Wet street at the foot of the skyline. The signs stack top to bottom, so only the
+           lowest one is close enough to throw its colour onto the ground. -->
       <div class="street" aria-hidden="true">
-        <span v-for="s in stations" :key="s.id" :style="{ '--c': `var(--color-neon-${s.color})` }" />
+        <span :style="{ '--c': neonVar(contact.color), width: signWidth ? `${signWidth}px` : undefined }" />
       </div>
     </header>
 
@@ -75,10 +91,9 @@ const year = new Date().getFullYear()
 
       <ChapterSection :station="contact">
         <p>
-          <strong>Looking for a first full-time role on a team that ships.</strong> The CV has the details; LinkedIn
-          and GitHub have the rest.
+          <strong>Looking for a first full-time role on a team that ships.</strong> If that sounds like your team, write to me.
         </p>
-        <ActionLinks class="contact-actions" />
+        <ContactLinks class="contact-actions" />
         <p class="terminus"><span lang="ja">終点</span> · End of the line</p>
       </ChapterSection>
     </main>
@@ -151,13 +166,12 @@ const year = new Date().getFullYear()
   height: 88px;
   display: flex;
   justify-content: center;
-  gap: 12px;
   padding-top: 30px;
   background: linear-gradient(rgb(11 14 26 / 0), var(--color-night) 34px, #0d1121);
   pointer-events: none;
 }
 .street span {
-  width: 16px;
+  width: 100px;
   height: 100%;
   background: linear-gradient(var(--c), transparent 85%);
   opacity: 0.32;
@@ -176,18 +190,10 @@ h1 {
     0 0 20px rgb(63 224 232 / 0.5),
     0 0 60px rgb(63 224 232 / 0.3);
 }
-/* The name's lines sit closer than a selection box is tall, so a filled highlight on "Lehing"
-   would cover "Fred". Selecting the name relights the letters in amber instead. */
+/* The name's lines sit closer than a selection box is tall; the site-wide amber relight
+   (style.css) has no box, so "Lehing" never covers "Fred" when selected. */
 .name-line {
   display: block;
-}
-h1::selection,
-h1 ::selection {
-  background: transparent;
-  color: var(--color-action);
-  text-shadow:
-    0 0 1px var(--color-action),
-    0 0 20px rgb(255 181 71 / 0.5);
 }
 .intro {
   margin: 18px 0 0 auto;
