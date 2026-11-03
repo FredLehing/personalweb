@@ -66,9 +66,14 @@
     padding-bottom: var(--line-bar);
   }
 
+  /* Selecting text relights it in amber neon instead of filling a box behind it,
+     the same treatment the hero name had first. */
   ::selection {
-    background: var(--color-action);
-    color: var(--color-action-ink);
+    background: transparent;
+    color: var(--color-action);
+    text-shadow:
+      0 0 1px var(--color-action),
+      0 0 20px rgb(255 181 71 / 0.5);
   }
 
   :focus-visible {

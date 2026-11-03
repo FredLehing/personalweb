@@ -16,6 +16,8 @@ export interface Profile {
   role: string
   status: string
   availability: string
+  /** Address the Contact chapter's main button mails, or null while it hasn't been chosen. */
+  email: string | null
   /** Path to the CV PDF in /public, or null while it hasn't been added. */
   cvUrl: string | null
   links: { linkedin: string | null; github: string | null }
@@ -28,6 +30,7 @@ export const profile: Profile = {
   role: 'Full-stack developer',
   status: 'Full-stack intern at [Company]',
   availability: 'open to a first full-time role',
+  email: 'lehingfred@gmail.com',
   cvUrl: null,
   links: {
     linkedin: 'https://www.linkedin.com/in/fredlehing/',
