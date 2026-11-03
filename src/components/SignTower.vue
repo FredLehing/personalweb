@@ -128,22 +128,25 @@ onMounted(() => {
     flex-direction: row;
     width: 100%;
   }
+  /* Kanji above, English below, like a station sign's bilingual plate. The label row sits on
+     one shared baseline across segments however tall each kanji column is. */
   .seg {
     flex: 1;
+    min-width: 0;
     grid-template-columns: auto;
-    justify-content: center;
-    padding: 12px 6px;
+    grid-template-rows: 1fr auto;
+    justify-items: center;
+    gap: 8px;
+    padding: 12px 2px 10px;
   }
   .kanji {
+    align-self: center;
     font-size: 1.25rem;
   }
   .label {
-    /* Keep the label for screen readers; there is no room to show it. */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+    writing-mode: horizontal-tb;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
     white-space: nowrap;
   }
 }

@@ -146,10 +146,20 @@ onBeforeUnmount(() => observer?.disconnect())
   padding: 0 var(--gutter) 56px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: clamp(20px, 4vw, 64px);
+  /* The tower body reaches past the sign into this gap, but always stops short of the name
+     and the actions: whatever is left of the gap after the overhang is their breathing room. */
+  --hero-gap: clamp(20px, 4vw, 64px);
+  --tower-overhang: clamp(12px, calc(var(--hero-gap) - 18px), 48px);
+  gap: var(--hero-gap);
   align-items: center;
 }
 
+/* Above the tower body, so even a rounding pixel of overlap never hides text behind it. */
+.board,
+.act {
+  position: relative;
+  z-index: 1;
+}
 .board {
   justify-self: end;
   text-align: right;
@@ -205,6 +215,7 @@ h1 {
 }
 .intro strong {
   display: block;
+  text-wrap: balance;
   color: var(--color-ink);
   font-weight: 600;
 }
@@ -215,14 +226,15 @@ h1 {
   justify-content: center;
   padding-top: 28px;
 }
-/* The tower's dark body, running down from behind the sign to the street. */
+/* The tower's dark body, running down from behind the sign to the street. Sized from the sign
+   (this column is exactly as wide as the sign) plus an overhang that fits inside the hero gap. */
 .tower::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: -100vh;
   left: 50%;
-  width: min(220px, 40vw);
+  width: calc(100% + 2 * var(--tower-overhang));
   transform: translateX(-50%);
   background: var(--color-tower);
   box-shadow: inset 0 0 0 1px #20263d;
