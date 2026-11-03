@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { profile } from '@/content/profile'
+import { isPlaceholder, profile } from '@/content/profile'
 import { neonVar, stations } from '@/content/stations'
 import RouteLine from '@/components/RouteLine.vue'
 import SignTower from '@/components/SignTower.vue'
@@ -30,6 +30,15 @@ onMounted(() => {
   observer.observe(tower.value)
 })
 onBeforeUnmount(() => observer?.disconnect())
+
+// Confirmed stack only; placeholders like "[from CV]" never reach the hero.
+const stackLine = Object.values(profile.stack)
+  .flat()
+  .filter((t) => !isPlaceholder(t))
+  .join(' · ')
+
+// The tower's windows below the sign, four to a floor: 0 dark, 1 cool, 2 warm. Kept sparse.
+const towerWindows = '01000020100000010200100000102001'
 </script>
 
 <template>
@@ -42,27 +51,58 @@ onBeforeUnmount(() => observer?.disconnect())
 
       <div class="hero-grid">
         <div class="board">
-          <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
-          <p class="intro">
-            <strong>Full-stack developer, interning right now.</strong> I build the interface and the system
-            behind it, and I care about both ends the same.
-          </p>
+          <!-- The name sign is side-mounted to the tower wall by two steel brackets. -->
+          <div class="kanban">
+            <span class="kb-deco kb-mount top" aria-hidden="true" />
+            <span class="kb-deco kb-mount bot" aria-hidden="true" />
+            <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
+          </div>
+          <!-- The intro hangs on a plain plaque from the bottom of the name sign. -->
+          <div class="kanban plaque sub">
+            <span class="kb-deco kb-hang l" aria-hidden="true" />
+            <span class="kb-deco kb-hang r" aria-hidden="true" />
+            <p class="intro">
+              <strong>Full-stack developer, interning right now.</strong> I build the interface and the system
+              behind it, and I care about both ends the same.
+            </p>
+            <p v-if="stackLine" class="stack-line">{{ stackLine }}</p>
+          </div>
         </div>
 
         <div ref="tower" class="tower">
+          <!-- Building detail: a rooftop with an aircraft light, a few dim windows below the sign,
+               and brackets fixing the sign to the building. All dimmer than the sign. -->
+          <div class="tw-deco tw-roof" aria-hidden="true">
+            <span class="tw-mast" />
+            <span class="tw-beacon" />
+          </div>
+          <div class="tw-deco tw-windows" aria-hidden="true">
+            <span v-for="(w, i) in towerWindows" :key="i" :class="{ cool: w === '1', warm: w === '2' }" />
+          </div>
+          <span class="tw-deco tw-bracket l top" aria-hidden="true" />
+          <span class="tw-deco tw-bracket r top" aria-hidden="true" />
+          <span class="tw-deco tw-bracket l bot" aria-hidden="true" />
+          <span class="tw-deco tw-bracket r bot" aria-hidden="true" />
           <SignTower />
         </div>
 
         <div class="act">
-          <ActionLinks layout="stack" />
-          <p class="status">{{ profile.status }} · {{ profile.availability }}</p>
+          <!-- The actions sit on a plain, unlit plaque, side-mounted to the tower the same way. -->
+          <div class="kanban plaque">
+            <span class="kb-deco kb-mount top" aria-hidden="true" />
+            <span class="kb-deco kb-mount bot" aria-hidden="true" />
+            <ActionLinks layout="stack" />
+            <p class="status">{{ profile.status }} · {{ profile.availability }}</p>
+          </div>
         </div>
       </div>
 
       <!-- Wet street at the foot of the skyline. The signs stack top to bottom, so only the
            lowest one is close enough to throw its colour onto the ground. -->
       <div class="street" aria-hidden="true">
-        <span :style="{ '--c': neonVar(contact.color), width: signWidth ? `${signWidth}px` : undefined }" />
+        <div class="street-grid">
+          <span :style="{ '--c': neonVar(contact.color), width: signWidth ? `${signWidth}px` : undefined }" />
+        </div>
       </div>
     </header>
 
@@ -135,6 +175,10 @@ onBeforeUnmount(() => observer?.disconnect())
   overflow: hidden;
   min-height: max(700px, 100vh);
   background: linear-gradient(var(--color-sky), var(--color-night) 75%);
+  /* Shared by the hero grid and the street, so the reflection always sits under the tower. */
+  --hero-gap: clamp(20px, 4vw, 64px);
+  --tower-overhang: clamp(12px, calc(var(--hero-gap) - 18px), 48px);
+  --hero-columns: minmax(0, 1.25fr) auto minmax(0, 1fr);
 }
 
 .hero-grid {
@@ -145,11 +189,10 @@ onBeforeUnmount(() => observer?.disconnect())
   margin: 0 auto;
   padding: 0 var(--gutter) 56px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  /* The name side carries two signs; the actions plaque only needs room for 120px buttons. */
+  grid-template-columns: var(--hero-columns);
   /* The tower body reaches past the sign into this gap, but always stops short of the name
      and the actions: whatever is left of the gap after the overhang is their breathing room. */
-  --hero-gap: clamp(20px, 4vw, 64px);
-  --tower-overhang: clamp(12px, calc(var(--hero-gap) - 18px), 48px);
   gap: var(--hero-gap);
   align-items: center;
 }
@@ -174,13 +217,22 @@ onBeforeUnmount(() => observer?.disconnect())
   right: 0;
   bottom: 0;
   height: 88px;
-  display: flex;
-  justify-content: center;
   padding-top: 30px;
   background: linear-gradient(rgb(11 14 26 / 0), var(--color-night) 34px, #0d1121);
   pointer-events: none;
 }
+/* Same columns as the hero grid; the middle one is exactly the sign's width. */
+.street-grid {
+  max-width: 1300px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: var(--hero-columns);
+  gap: var(--hero-gap);
+}
 .street span {
+  grid-column: 2;
   width: 100px;
   height: 100%;
   background: linear-gradient(var(--c), transparent 85%);
@@ -204,6 +256,25 @@ h1 {
    (style.css) has no box, so "Lehing" never covers "Fred" when selected. */
 .name-line {
   display: block;
+}
+/* At load each line of the name switches on like the signs: a dim unlit tube, then a stepped
+   flicker. "Fred" first, then "Lehing", then the sign segments (380ms + 240ms each) carry on
+   the sequence. Reduced motion: the name is simply on. */
+@media (prefers-reduced-motion: no-preference) {
+  .name-line {
+    animation: name-ignite 0.6s steps(1, end) 120ms backwards;
+  }
+  .name-line + .name-line {
+    animation-delay: 260ms;
+  }
+}
+@keyframes name-ignite {
+  0% { opacity: 0.18; }
+  18% { opacity: 1; }
+  30% { opacity: 0.45; }
+  48% { opacity: 1; }
+  62% { opacity: 0.75; }
+  100% { opacity: 1; }
 }
 .intro {
   margin: 18px 0 0 auto;
@@ -240,9 +311,197 @@ h1 {
   box-shadow: inset 0 0 0 1px #20263d;
 }
 
+/* Building detail on the tower. Same materials as the skyline (mast steel, #ff4a3d aircraft
+   light with its slow stepped blink, windows at skyline opacity), so the sign stays brightest. */
+.tw-roof {
+  position: absolute;
+  top: -12px;
+  left: calc(-1 * var(--tower-overhang) + 10px);
+  right: calc(-1 * var(--tower-overhang) + 10px);
+  height: 12px;
+  background: var(--color-tower);
+  box-shadow: inset 0 0 0 1px #20263d;
+}
+.tw-mast {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 2px;
+  height: 38px;
+  transform: translateX(-50%);
+  background: #252b45;
+}
+.tw-mast::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: -5px;
+  width: 12px;
+  height: 1.5px;
+  background: #252b45;
+}
+.tw-beacon {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 36px);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #ff4a3d;
+  animation: tw-beacon 3.2s steps(1, end) infinite;
+}
+@keyframes tw-beacon {
+  0% { opacity: 0.25; }
+  80% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.tw-windows {
+  position: absolute;
+  top: calc(100% + 36px);
+  left: calc(-1 * var(--tower-overhang) + 16px);
+  right: calc(-1 * var(--tower-overhang) + 16px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: 22px;
+  justify-items: center;
+}
+.tw-windows span {
+  width: 9px;
+  height: 6px;
+}
+.tw-windows .cool {
+  background: #cfe0ff;
+  opacity: 0.22;
+}
+.tw-windows .warm {
+  background: #ffd48a;
+  opacity: 0.32;
+}
+.tw-bracket {
+  position: absolute;
+  width: calc(var(--tower-overhang) - 6px);
+  height: 5px;
+  background: #252b45;
+  box-shadow: inset 0 1px 0 #39415f;
+}
+.tw-bracket::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 11px;
+  background: #2a3150;
+}
+.tw-bracket.l { right: 100%; }
+.tw-bracket.l::after { left: 0; }
+.tw-bracket.r { left: 100%; }
+.tw-bracket.r::after { right: 0; }
+.tw-bracket.top { top: 64px; }
+.tw-bracket.bot { bottom: 36px; }
+@media (prefers-reduced-motion: reduce) {
+  .tw-beacon {
+    animation: none;
+  }
+}
+
 .act {
   justify-self: start;
 }
+
+/* Signs (kanban) side-mounted to the tower walls by short steel brackets, in the same steel as
+   the tower's own brackets, so the city reads as one material. The name's face is dark: it holds
+   the neon name, it isn't a lightbox, and the plaques are plainer still, so the tower stays the
+   landmark. */
+.kanban {
+  /* How far a bracket reaches to the tower wall: whatever the overhang leaves of the gap. */
+  --reach: calc(var(--hero-gap) - var(--tower-overhang));
+  --rim: 4px;
+  position: relative;
+  padding: 18px 26px 22px;
+  border: var(--rim) solid #151a2c;
+  border-radius: 22px;
+  background: var(--color-sign);
+  box-shadow:
+    0 0 0 1px #252b45,
+    inset 0 0 0 1px #2a3048;
+}
+.board .kanban {
+  text-align: center;
+}
+.kanban.plaque {
+  --rim: 3px;
+  padding: 20px;
+  border-radius: 6px;
+}
+/* Intro plaque: hung from the name sign's bottom edge by two short rods. */
+.kanban.sub {
+  --drop: 16px;
+  margin-top: var(--drop);
+  padding: 18px clamp(14px, 1.5vw, 22px) 20px;
+  text-align: left;
+}
+.sub .intro {
+  margin: 0;
+}
+.stack-line {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-rule);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-faint);
+}
+/* Narrow desktops squeeze the column, so the intro gets slightly smaller instead of wrapping on. */
+@media (min-width: 960px) {
+  .sub .intro {
+    font-size: clamp(0.95rem, 1.3vw, 1.25rem);
+  }
+}
+.kb-hang {
+  position: absolute;
+  top: calc(-1 * (var(--rim) + var(--drop)));
+  width: 2px;
+  height: calc(var(--drop) + var(--rim));
+  background: #252b45;
+}
+.kb-hang.l { left: 24%; }
+.kb-hang.r { right: 24%; }
+
+/* Side mounts: a bar from the sign's edge to the tower wall, with a bolt plate at each end. */
+.kb-mount {
+  position: absolute;
+  width: var(--reach);
+  height: 5px;
+  background: #252b45;
+  box-shadow: inset 0 1px 0 #39415f;
+}
+.kb-mount::before,
+.kb-mount::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 11px;
+  background: #2a3150;
+}
+.kb-mount::before { left: 0; }
+.kb-mount::after { right: 0; }
+.kb-mount.top { top: 24px; }
+.kb-mount.bot { bottom: 24px; }
+/* Name sign: the tower is on its right. */
+.board .kb-mount { right: calc(-1 * (var(--rim) + var(--reach))); }
+/* Actions plaque: the tower is on its left. */
+.plaque .kb-mount { left: calc(-1 * (var(--rim) + var(--reach))); }
+
+/* The status line sets the plaque's width; the buttons fill it instead of leaving a dark gap. */
+@media (min-width: 960px) {
+  .act .plaque :deep(.actions.stack) {
+    align-items: stretch;
+  }
+}
+
 .status {
   margin-top: 20px;
   max-width: 26ch;
@@ -318,8 +577,24 @@ h1 {
     width: 100%;
     padding-top: 0;
   }
-  .tower::before {
+  .tower::before,
+  .tw-deco,
+  .kb-deco {
     display: none;
+  }
+  /* No tower wall to hang from on phones, so the signs fall back to plain text. */
+  .kanban,
+  .kanban.plaque {
+    margin-top: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .kanban.sub {
+    margin-top: 18px;
+    text-align: center;
   }
   .street {
     display: none;
