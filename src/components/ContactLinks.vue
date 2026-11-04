@@ -3,16 +3,16 @@ import { computed } from 'vue'
 import { profile } from '@/content/profile'
 
 // The Contact chapter's job is "get in touch", not "look me up" (the hero already does that).
-// So email is the one primary action here; the profiles and CV follow as quiet text links.
+// So email is the one primary action here; the profiles follow as quiet text links. The CV is left
+// out: it already sits in the hero's actions, where a recruiter will have taken it.
 // Anything without a target yet is left out of the text links, and email shows a "soon" state.
 
 const mailto = computed(() => (profile.email ? `mailto:${profile.email}` : null))
 
 const secondary = computed(() =>
   [
-    { key: 'linkedin', label: 'LinkedIn', href: profile.links.linkedin, external: true },
-    { key: 'github', label: 'GitHub', href: profile.links.github, external: true },
-    { key: 'cv', label: 'CV', href: profile.cvUrl, download: true },
+    { key: 'linkedin', label: 'LinkedIn', href: profile.links.linkedin },
+    { key: 'github', label: 'GitHub', href: profile.links.github },
   ].filter((l): l is typeof l & { href: string } => !!l.href),
 )
 </script>
@@ -31,9 +31,8 @@ const secondary = computed(() =>
         <span v-if="i > 0" aria-hidden="true"> · </span>
         <a
           :href="l.href"
-          :download="l.download || undefined"
-          :target="l.external ? '_blank' : undefined"
-          :rel="l.external ? 'noopener' : undefined"
+          target="_blank"
+          rel="noopener"
           >{{ l.label }}</a
         >
       </template>

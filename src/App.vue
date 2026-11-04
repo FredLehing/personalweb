@@ -50,9 +50,7 @@ const year = new Date().getFullYear()
       </ChapterSection>
 
       <ChapterSection :station="projects">
-        <p>
-          <strong>Things I've built, on video.</strong>&#32;<span class="ph">[One or two lines on what ties them together, in your own words.]</span>
-        </p>
+        <p>Coming soon.</p>
         <ol class="projects">
           <li v-for="(p, i) in projectList" :key="p.id">
             <ProjectScreen :project="p" :index="i" />
@@ -61,12 +59,7 @@ const year = new Date().getFullYear()
       </ChapterSection>
 
       <ChapterSection :station="dream">
-        <p>
-          <strong>It started with <em>Tokyo Drift</em>.</strong> The neon, the night streets, a city that never quite
-          goes dark. I haven't been yet. Tokyo and Kyoto have been at the top of my list for years, and this line is
-          where it ends.
-        </p>
-        <span class="note">Draft copy written from Fred's answers, to be rewritten in his own words.</span>
+        <p>Coming soon.</p>
       </ChapterSection>
 
       <ChapterSection :station="contact">

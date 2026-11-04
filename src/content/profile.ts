@@ -32,8 +32,8 @@ export interface Profile {
 export const profile: Profile = {
   name: 'Fred Lehing',
   role: 'Full-stack developer',
-  status: 'Junior Software Developer intern at BCS Koolitus',
-  availability: 'open to junior dev roles',
+  status: 'Intern at BCS Koolitus',
+  availability: 'open to junior roles',
   email: 'lehingfred@gmail.com',
   cvUrl: '/cv/Fred_Lehing_CV_ENG.pdf',
   links: {
