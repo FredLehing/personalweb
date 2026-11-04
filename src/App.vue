@@ -9,8 +9,11 @@ import ActionLinks from '@/components/ActionLinks.vue'
 import ContactLinks from '@/components/ContactLinks.vue'
 import ChapterSection from '@/components/ChapterSection.vue'
 import ExperienceList from '@/components/ExperienceList.vue'
+import ProjectScreen from '@/components/ProjectScreen.vue'
+import { projects as projectList } from '@/content/projects'
 
-const [about, work, dream, contact] = stations as [
+const [about, work, projects, dream, contact] = stations as [
+  (typeof stations)[number],
   (typeof stations)[number],
   (typeof stations)[number],
   (typeof stations)[number],
@@ -222,7 +225,7 @@ const stackLine = Object.values(profile.stack)
 
       <!-- Wet street at the foot of the skyline. Only signs close to the ground throw their colour
            onto it: on desktop the segments stack, so the two lowest (Contact, then Dream) reflect; on phones
-           they hang side by side at one height, so all four do. -->
+           they hang side by side at one height, so all five do. -->
       <div ref="street" class="street" aria-hidden="true">
         <div class="street-grid">
           <div class="refl" :style="{ width: signWidth ? `${signWidth}px` : undefined }">
@@ -244,6 +247,17 @@ const stackLine = Object.values(profile.stack)
 
       <ChapterSection :station="work">
         <ExperienceList />
+      </ChapterSection>
+
+      <ChapterSection :station="projects">
+        <p>
+          <strong>Things I've built, on video.</strong>&#32;<span class="ph">[One or two lines on what ties them together, in your own words.]</span>
+        </p>
+        <ol class="projects">
+          <li v-for="(p, i) in projectList" :key="p.id">
+            <ProjectScreen :project="p" :index="i" />
+          </li>
+        </ol>
       </ChapterSection>
 
       <ChapterSection :station="dream">
@@ -315,6 +329,11 @@ const stackLine = Object.values(profile.stack)
   inherits: true;
   initial-value: 1;
 }
+@property --lit-projects {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
 @property --lit-dream {
   syntax: '<number>';
   inherits: true;
@@ -329,6 +348,7 @@ const stackLine = Object.values(profile.stack)
   --glow-cyan: color-mix(in srgb, var(--color-neon-cyan) calc(var(--lit-name) * 100%), transparent);
   --glow-pink: color-mix(in srgb, var(--color-neon-pink) calc(var(--lit-about) * 100%), transparent);
   --glow-amber: color-mix(in srgb, var(--color-neon-amber) calc(var(--lit-work) * 100%), transparent);
+  --glow-vermilion: color-mix(in srgb, var(--color-neon-vermilion) calc(var(--lit-projects) * 100%), transparent);
   --glow-violet: color-mix(in srgb, var(--color-neon-violet) calc(var(--lit-dream) * 100%), transparent);
   --glow-lime: color-mix(in srgb, var(--color-neon-lime) calc(var(--lit-contact) * 100%), transparent);
 }
@@ -338,14 +358,16 @@ const stackLine = Object.values(profile.stack)
       lit-name 0.6s steps(1, end) 120ms backwards,
       lit-about 0.6s steps(1, end) 380ms backwards,
       lit-work 0.6s steps(1, end) 620ms backwards,
-      lit-dream 0.6s steps(1, end) 860ms backwards,
-      lit-contact 0.6s steps(1, end) 1100ms backwards;
+      lit-projects 0.6s steps(1, end) 860ms backwards,
+      lit-dream 0.6s steps(1, end) 1100ms backwards,
+      lit-contact 0.6s steps(1, end) 1340ms backwards;
   }
 }
 /* The signs' ignite curve, from dark (no light thrown) rather than from the unlit tube's dim. */
 @keyframes lit-name { 0% { --lit-name: 0; } 18% { --lit-name: 1; } 30% { --lit-name: 0.45; } 48% { --lit-name: 1; } 62% { --lit-name: 0.75; } 100% { --lit-name: 1; } }
 @keyframes lit-about { 0% { --lit-about: 0; } 18% { --lit-about: 1; } 30% { --lit-about: 0.45; } 48% { --lit-about: 1; } 62% { --lit-about: 0.75; } 100% { --lit-about: 1; } }
 @keyframes lit-work { 0% { --lit-work: 0; } 18% { --lit-work: 1; } 30% { --lit-work: 0.45; } 48% { --lit-work: 1; } 62% { --lit-work: 0.75; } 100% { --lit-work: 1; } }
+@keyframes lit-projects { 0% { --lit-projects: 0; } 18% { --lit-projects: 1; } 30% { --lit-projects: 0.45; } 48% { --lit-projects: 1; } 62% { --lit-projects: 0.75; } 100% { --lit-projects: 1; } }
 @keyframes lit-dream { 0% { --lit-dream: 0; } 18% { --lit-dream: 1; } 30% { --lit-dream: 0.45; } 48% { --lit-dream: 1; } 62% { --lit-dream: 0.75; } 100% { --lit-dream: 1; } }
 @keyframes lit-contact { 0% { --lit-contact: 0; } 18% { --lit-contact: 1; } 30% { --lit-contact: 0.45; } 48% { --lit-contact: 1; } 62% { --lit-contact: 0.75; } 100% { --lit-contact: 1; } }
 .hero {
@@ -824,7 +846,7 @@ h1 {
 .kb-mount.bot { bottom: 24px; }
 /* Light from the neon. The name sign's dark face catches its own cyan behind the letters, and
    every side sign takes a faint wash, on the edge facing the tower, from the segments level
-   with it (top to bottom: pink About, amber Work, violet Dream, lime Contact). Screen-blended,
+   with it (top to bottom: pink About, amber Work, vermilion Projects, violet Dream, lime Contact). Screen-blended,
    so text only gets lighter. The side-sign washes are desktop only; phones have their own
    (see the phone section). */
 .name-sign {
@@ -865,16 +887,18 @@ h1 {
   }
   .kanban.sub {
     --spill: linear-gradient(
-      var(--glow-amber) 8%,
-      var(--glow-violet) 32% 58%,
-      var(--glow-lime) 80%
+      var(--glow-amber) 4%,
+      var(--glow-vermilion) 26%,
+      var(--glow-violet) 52% 64%,
+      var(--glow-lime) 86%
     );
   }
   .act .plaque {
     --spill: linear-gradient(
-      var(--glow-pink) 22%,
-      var(--glow-amber) 42% 70%,
-      var(--glow-violet) 92%
+      var(--glow-pink) 16%,
+      var(--glow-amber) 36%,
+      var(--glow-vermilion) 60% 72%,
+      var(--glow-violet) 94%
     );
   }
 }
@@ -900,6 +924,19 @@ h1 {
 }
 
 /* ───────── chapters & footer ───────── */
+.projects {
+  display: grid;
+  gap: 72px;
+  margin: 44px 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 959px) {
+  .projects {
+    gap: 56px;
+    margin-top: 32px;
+  }
+}
 .contact-actions {
   margin-top: 32px;
 }
@@ -943,9 +980,9 @@ h1 {
 }
 
 /* ───────── phones: the tower is the whole hero ─────────
-   Top to bottom: the name as a rooftop sign on steel legs, the roof, the four segments as one
+   Top to bottom: the name as a rooftop sign on steel legs, the roof, the five segments as one
    sign bolted across the facade, the intro on a plaque, and the actions at street level under a
-   canopy, like the building's entrance. The street reflects all four segments. The DOM order
+   canopy, like the building's entrance. The street reflects all five segments. The DOM order
    stays name, intro, sign, actions; `order` rebuilds the building without moving the markup. */
 @media (max-width: 959px) {
   .hero {
@@ -1078,8 +1115,9 @@ h1 {
     background: linear-gradient(
       90deg,
       var(--glow-pink),
-      var(--glow-amber) 35%,
-      var(--glow-violet) 65%,
+      var(--glow-amber) 25%,
+      var(--glow-vermilion) 50%,
+      var(--glow-violet) 75%,
       var(--glow-lime)
     );
     opacity: 0.16;
@@ -1150,7 +1188,7 @@ h1 {
     text-align: center;
   }
 
-  /* The wet street, above the Fred Line bar: all four segments reflect. */
+  /* The wet street, above the Fred Line bar: all five segments reflect. */
   .street {
     height: calc(66px + var(--line-bar));
     padding-top: 22px;

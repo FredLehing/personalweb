@@ -181,4 +181,22 @@ const { lit } = useJourney()
     white-space: nowrap;
   }
 }
+
+/* Narrow phones (tower under 340px): five horizontal labels no longer fit at 11px, so each label
+   turns vertical beside its kanji, as on the desktop sign. */
+@media (max-width: 435px) {
+  .seg {
+    grid-template-columns: auto auto;
+    grid-template-rows: auto;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 2px;
+  }
+  .label {
+    writing-mode: vertical-rl;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+}
 </style>

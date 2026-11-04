@@ -1,7 +1,7 @@
-// The four chapters of the page. Each one is a sign segment on the tower,
+// The five chapters of the page. Each one is a sign segment on the tower,
 // a stop on the Fred Line, and a section on the page, in this order.
 
-export type NeonColor = 'pink' | 'cyan' | 'amber' | 'violet' | 'lime'
+export type NeonColor = 'pink' | 'cyan' | 'amber' | 'vermilion' | 'violet' | 'lime'
 
 export interface Station {
   id: string
@@ -19,6 +19,7 @@ export interface Station {
 export const stations: Station[] = [
   { id: 'about', label: 'About', title: 'About', kanji: '自己紹介', color: 'pink' },
   { id: 'work', label: 'Work', title: 'Experience', kanji: '仕事', color: 'amber' },
+  { id: 'projects', label: 'Projects', title: 'Projects', kanji: '作品', color: 'vermilion' },
   { id: 'dream', label: 'Dream', title: 'Japan', kanji: '夢', chapterKanji: '日本', color: 'violet' },
   { id: 'contact', label: 'Contact', title: 'Contact', kanji: '連絡', chapterKanji: '連絡 · 終点', color: 'lime' },
 ]
