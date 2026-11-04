@@ -28,10 +28,6 @@ const year = new Date().getFullYear()
 
     <main>
       <ChapterSection :station="about">
-        <p>
-          <strong>I'm Fred, a full-stack developer.</strong> I'm an intern right now, working on both the front end
-          and the back end, and I enjoy them about equally.
-        </p>
         <p class="ph">[A few lines about you in your own words: where you're from and what you do when you're not coding.]</p>
         <p class="ph">[What you care about: how you like to work, what kind of software you want to build, what makes a team good to you.]</p>
       </ChapterSection>
