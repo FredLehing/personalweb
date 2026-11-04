@@ -12,10 +12,10 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
         <p class="role" :class="{ ph: isPlaceholder(entry.role) }">{{ entry.role }}</p>
         <p class="place" :class="{ ph: isPlaceholder(entry.place) }">{{ entry.place }}</p>
       </div>
-      <ul class="layers" aria-label="Parts of the stack">
+      <ul v-if="entry.layers.length" class="layers" aria-label="Parts of the stack">
         <li v-for="layer in entry.layers" :key="layer">{{ layerName[layer] }}</li>
-        <li v-if="entry.layers.length === 0" class="ph">[layers from CV]</li>
       </ul>
+      <span v-else-if="entry.milestone" class="milestone">{{ entry.milestone }}</span>
     </li>
   </ol>
 </template>
@@ -70,6 +70,21 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
   border-radius: 999px;
   color: var(--color-muted);
   box-shadow: inset 0 0 0 1px var(--color-rule-strong);
+}
+/* Same chip shape as the layers, in the Work chapter's amber, so the turning point reads apart. */
+.milestone {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  color: var(--color-neon-amber);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-neon-amber) 55%, transparent);
+}
+@media (max-width: 640px) {
+  .milestone {
+    justify-self: start;
+  }
 }
 .layers li.ph {
   box-shadow: none;
