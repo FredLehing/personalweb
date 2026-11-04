@@ -55,6 +55,9 @@ const towerWindows = '01000020100000010200100000102001'
           <div class="kanban name-sign">
             <span class="kb-deco kb-mount top" aria-hidden="true" />
             <span class="kb-deco kb-mount bot" aria-hidden="true" />
+            <!-- Phones: the name is the rooftop sign, with the mast and aircraft light on top. -->
+            <span class="ph-deco ph-mast" aria-hidden="true" />
+            <span class="ph-deco ph-beacon" aria-hidden="true" />
             <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
           </div>
           <!-- The intro hangs on a plain plaque from the bottom of the name sign. -->
@@ -98,11 +101,14 @@ const towerWindows = '01000020100000010200100000102001'
         </div>
       </div>
 
-      <!-- Wet street at the foot of the skyline. The signs stack top to bottom, so only the
-           lowest one is close enough to throw its colour onto the ground. -->
+      <!-- Wet street at the foot of the skyline. Only signs close to the ground throw their colour
+           onto it: on desktop the segments stack, so only the lowest (Contact) reflects; on phones
+           they hang side by side at one height, so all four do. -->
       <div class="street" aria-hidden="true">
         <div class="street-grid">
-          <span :style="{ '--c': neonVar(contact.color), width: signWidth ? `${signWidth}px` : undefined }" />
+          <div class="refl" :style="{ width: signWidth ? `${signWidth}px` : undefined }">
+            <span v-for="s in stations" :key="s.id" :style="{ '--c': neonVar(s.color) }" />
+          </div>
         </div>
       </div>
     </header>
@@ -232,13 +238,22 @@ const towerWindows = '01000020100000010200100000102001'
   grid-template-columns: var(--hero-columns);
   gap: var(--hero-gap);
 }
-.street span {
+.refl {
   grid-column: 2;
+  display: flex;
+  gap: 6px;
   width: 100px;
   height: 100%;
+}
+.refl span {
+  flex: 1;
   background: linear-gradient(var(--c), transparent 85%);
   opacity: 0.32;
   filter: blur(6px);
+}
+/* Desktop: only the lowest segment (the last one) is near the ground. */
+.refl span:not(:last-child) {
+  display: none;
 }
 
 h1 {
@@ -524,17 +539,21 @@ h1 {
 /* Light from the neon. The name sign's dark face catches its own cyan behind the letters, and
    every side sign takes a faint wash, on the edge facing the tower, from the segments level
    with it (top to bottom: pink About, amber Work, violet Dream, lime Contact). Screen-blended,
-   so text only gets lighter. Desktop only: phones have no tower beside the signs. */
+   so text only gets lighter. The side-sign washes are desktop only; phones have their own
+   (see the phone section). */
+.name-sign {
+  background: radial-gradient(
+    ellipse 70% 62% at 50% 50%,
+    color-mix(in srgb, var(--color-neon-cyan) 9%, var(--color-sign)),
+    var(--color-sign) 78%
+  );
+  box-shadow:
+    0 0 0 1px #252b45,
+    inset 0 0 0 1px color-mix(in srgb, var(--color-neon-cyan) 22%, #2a3048);
+}
 @media (min-width: 960px) {
-  .name-sign {
-    background: radial-gradient(
-      ellipse 70% 62% at 50% 50%,
-      color-mix(in srgb, var(--color-neon-cyan) 9%, var(--color-sign)),
-      var(--color-sign) 78%
-    );
-    box-shadow:
-      0 0 0 1px #252b45,
-      inset 0 0 0 1px color-mix(in srgb, var(--color-neon-cyan) 22%, #2a3048);
+  .ph-deco {
+    display: none;
   }
   .kanban::after {
     content: '';
@@ -635,62 +654,221 @@ h1 {
   color: var(--color-ink);
 }
 
-/* ───────── phones: one centred column ───────── */
+/* ───────── phones: the tower is the whole hero ─────────
+   Top to bottom: the name as a rooftop sign on steel legs, the roof, the four segments as one
+   sign bolted across the facade, the intro on a plaque, and the actions at street level under a
+   canopy, like the building's entrance. The street reflects all four segments. The DOM order
+   stays name, intro, sign, actions; `order` rebuilds the building without moving the markup. */
 @media (max-width: 959px) {
-  .hero,
-  .hero-grid {
+  .hero {
     min-height: 0;
   }
   .hero-grid {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    align-content: start;
-    gap: 32px;
-    padding-top: 80px;
-    padding-bottom: 72px;
+    /* The tower's width: the city shows on both sides, and it stops growing on tablets. */
+    --tw: min(calc(100% - 2 * clamp(32px, calc(36vw - 94px), 48px)), 340px);
+    --tower-overhang: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100svh;
+    padding: 56px 0 0;
     text-align: center;
   }
   .board {
-    justify-self: center;
-    text-align: center;
+    display: contents;
   }
-  .intro {
-    margin: 18px auto 0;
+
+  /* Rooftop sign (屋上看板): the name, on a lattice of steel legs standing on the roof. */
+  .name-sign {
+    order: 1;
+    width: calc(var(--tw) - 8px);
+    margin-bottom: 36px; /* 24px of legs, then the 12px roof */
+    padding: 14px 12px 16px;
+    border-radius: 18px;
   }
+  .name-sign::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: calc(-1 * (var(--rim) + 24px));
+    height: 24px;
+    background:
+      repeating-linear-gradient(60deg, transparent 0 9px, #252b45 9px 11px),
+      repeating-linear-gradient(-60deg, transparent 0 9px, #252b45 9px 11px);
+    border-inline: 3px solid #252b45;
+    opacity: 0.9;
+  }
+  .ph-mast {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + var(--rim));
+    width: 2px;
+    height: 38px;
+    transform: translateX(-50%);
+    background: #252b45;
+  }
+  .ph-mast::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: -5px;
+    width: 12px;
+    height: 1.5px;
+    background: #252b45;
+  }
+  .ph-beacon {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + var(--rim) + 36px);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    background: #ff4a3d;
+    animation: tw-beacon 3.2s steps(1, end) infinite;
+  }
+
+  /* The tower: roof, transformer box and the sign row, with the body running down to the street. */
   .tower {
-    width: 100%;
-    padding-top: 0;
+    --sign-top: 28px;
+    order: 2;
+    width: var(--tw);
+    padding-inline: 8px;
   }
-  .tower::before,
-  .tw-deco,
+  .tw-roof {
+    left: -8px;
+    right: -8px;
+  }
+  .tw-roof > span,
+  .tw-spill {
+    display: none;
+  }
+  .tw-bolts {
+    inset: var(--sign-top) 8px 0;
+  }
+  /* One floor of windows between the sign and the plaque. */
+  .tw-windows {
+    top: calc(100% + 20px);
+    grid-template-columns: repeat(8, 1fr);
+  }
+  .tw-windows span:nth-child(n + 9) {
+    display: none;
+  }
+
+  /* The intro plaque, bolted to the facade under the sign. Its top edge catches the row's light. */
+  .kanban.sub {
+    order: 3;
+    z-index: 1;
+    width: calc(var(--tw) - 8px);
+    margin-top: 34px;
+    /* The canopy keeps its breathing room under the plaque however short the screen. */
+    margin-bottom: 26px;
+    padding: 14px 12px 16px;
+  }
+  .kanban.sub::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--rim));
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      var(--color-neon-pink),
+      var(--color-neon-amber) 35%,
+      var(--color-neon-violet) 65%,
+      var(--color-neon-lime)
+    );
+    opacity: 0.16;
+    mix-blend-mode: screen;
+    -webkit-mask-image: linear-gradient(#000, rgb(0 0 0 / 0.35) 14%, transparent 40%);
+    mask-image: linear-gradient(#000, rgb(0 0 0 / 0.35) 14%, transparent 40%);
+  }
+  .sub .intro {
+    max-width: none;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .stack-line {
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 12.5px;
+  }
   .kb-deco {
     display: none;
   }
-  /* No tower wall to hang from on phones, so the signs fall back to plain text. */
-  .kanban,
-  .kanban.plaque {
-    margin-top: 0;
+
+  /* Street level: the actions as the entrance, under a steel canopy. Whatever height the screen
+     has left goes to the wall above it, so the entrance always stands on the street. */
+  .act {
+    order: 4;
+    width: calc(var(--tw) - 24px);
+    margin-top: auto;
+    /* Clears the street's fade, so the status line never dims into it. */
+    padding: 14px 12px calc(var(--line-bar) + 60px);
+    background: #0a0d18;
+    box-shadow: inset 0 0 0 1px #20263d;
+  }
+  .act::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    height: 8px;
+    background: #252b45;
+    box-shadow:
+      inset 0 1px 0 #39415f,
+      0 10px 18px -6px #000;
+  }
+  .act .plaque {
     padding: 0;
     border: 0;
     border-radius: 0;
     background: none;
     box-shadow: none;
   }
-  .kanban.sub {
-    margin-top: 18px;
-    text-align: center;
+  .act .plaque :deep(.actions.stack) {
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
   }
-  .street {
-    display: none;
-  }
-  .act {
-    justify-self: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  .act .plaque :deep(a.btn) {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 44px;
+    padding: 0 10px;
+    gap: 6px;
   }
   .status {
+    margin: 10px auto 0;
+    max-width: 30ch;
+    font-size: 13px;
     text-align: center;
+  }
+
+  /* The wet street, above the Fred Line bar: all four segments reflect. */
+  .street {
+    height: calc(66px + var(--line-bar));
+    padding-top: 22px;
+    padding-bottom: var(--line-bar);
+  }
+  .street-grid {
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+  .refl span:not(:last-child) {
+    display: block;
+  }
+  .refl span {
+    opacity: 0.3;
+    filter: blur(5px);
+  }
+}
+@media (max-width: 959px) and (prefers-reduced-motion: reduce) {
+  .ph-beacon {
+    animation: none;
   }
 }
 </style>
