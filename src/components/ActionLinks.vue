@@ -9,7 +9,15 @@ import { profile } from '@/content/profile'
 
 defineProps<{ layout?: 'stack' | 'row' }>()
 
-type Action = { key: string; label: string; href: string | null; download?: boolean; external?: boolean }
+// `short` replaces the label on phones, where three buttons share one row.
+type Action = {
+  key: string
+  label: string
+  short?: string
+  href: string | null
+  download?: boolean
+  external?: boolean
+}
 
 const PRIMARY = 'github'
 
@@ -17,7 +25,7 @@ const actions = computed(() => {
   const all: Action[] = [
     { key: 'github', label: 'GitHub', href: profile.links.github, external: true },
     { key: 'linkedin', label: 'LinkedIn', href: profile.links.linkedin, external: true },
-    { key: 'cv', label: 'Download CV', href: profile.cvUrl, download: true },
+    { key: 'cv', label: 'Download CV', short: 'CV', href: profile.cvUrl, download: true },
   ]
   return all.filter((a): a is Action & { href: string } => !!a.href)
 })
@@ -36,9 +44,14 @@ const primaryKey = computed(
         :download="a.download || undefined"
         :target="a.external ? '_blank' : undefined"
         :rel="a.external ? 'noopener' : undefined"
+        :aria-label="a.short ? a.label : undefined"
       >
         <svg v-if="a.download" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" /></svg>
-        {{ a.label }}
+        <template v-if="a.short">
+          <span class="lbl-long">{{ a.label }}</span>
+          <span class="lbl-short">{{ a.short }}</span>
+        </template>
+        <template v-else>{{ a.label }}</template>
         <svg v-if="a.external" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8" /></svg>
       </a>
     </template>
@@ -95,6 +108,8 @@ a.btn {
   transform: scale(0.98);
 }
 .btn svg {
+  /* Never squeezed by a tight row: the label gives way, not the icon. */
+  flex: none;
   width: 18px;
   height: 18px;
   fill: none;
@@ -124,6 +139,18 @@ a.btn {
 @media (max-width: 959px) {
   .actions.stack {
     align-items: center;
+  }
+}
+.lbl-short {
+  display: none;
+}
+/* Phones: the three buttons share the entrance's one row. */
+@media (max-width: 719px), (max-width: 959px) and (max-height: 559px) {
+  .lbl-long {
+    display: none;
+  }
+  .lbl-short {
+    display: inline;
   }
 }
 </style>

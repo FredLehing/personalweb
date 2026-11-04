@@ -9,6 +9,8 @@ export interface ExperienceEntry {
   role: string
   place: string
   layers: Layer[]
+  /** One sentence on what the role was (two at most), shown under the company line. */
+  summary?: string
   /** Marks a turning point in the path (e.g. the retraining that started the dev career). */
   milestone?: string
 }
@@ -30,7 +32,7 @@ export interface Profile {
 export const profile: Profile = {
   name: 'Fred Lehing',
   role: 'Full-stack developer',
-  status: 'Junior Software Engineer intern at BCS Koolitus',
+  status: 'Junior Software Developer intern at BCS Koolitus',
   availability: 'open to junior dev roles',
   email: 'lehingfred@gmail.com',
   cvUrl: '/cv/Fred_Lehing_CV_ENG.pdf',
@@ -49,20 +51,45 @@ export const profile: Profile = {
   experience: [
     {
       period: '2026 —',
-      role: 'Junior Software Engineer Intern',
+      role: 'Junior Software Developer Intern',
       place: 'BCS Koolitus AS · Tallinn',
       layers: ['frontend', 'backend', 'data'],
+      summary:
+        'Building a greenfield website in a team of three interns: a Java and Spring Boot REST API with PostgreSQL and JWT auth, and a Vue 3 frontend with role-based views. Spec-first and AI-assisted, with Spring AI features such as generating course descriptions from curriculum PDFs.',
     },
     {
       period: '2026',
-      role: 'Junior Full-Stack AI Developer program',
+      role: 'Junior AI Full-Stack Developer program',
       place: 'Vali IT! · Tallinn',
       layers: [],
       milestone: 'Career change',
+      summary:
+        'An intensive retraining program in full-stack development and AI integration (Java, Spring, Vue, PostgreSQL), ending in a group project.',
     },
-    { period: '2024 — 2026', role: 'Senior Content Operations Specialist', place: 'Sportradar AG · Tallinn', layers: [] },
-    { period: '2022 — 2024', role: 'Amazon Listing Manager', place: 'NoCry OÜ · Tallinn', layers: [] },
-    { period: '2018 — 2022', role: 'Assistant Store Manager', place: 'Sportland Eesti AS · Tallinn', layers: [] },
+    {
+      period: '2024 — 2026',
+      role: 'Senior Content Operations Specialist',
+      place: 'Sportradar AG · Tallinn',
+      layers: [],
+      summary:
+        'Co-owned cross-team projects with 8 internal teams and 3 products, acted as the escalation point for high-priority issues, and built KPI frameworks and documentation in Jira and Confluence.',
+    },
+    {
+      period: '2022 — 2024',
+      role: 'Amazon Listing Manager',
+      place: 'NoCry OÜ · Tallinn',
+      layers: [],
+      summary:
+        'Managed 50+ product listings across four international Amazon markets, working with shipping, purchasing and sales teams.',
+    },
+    {
+      period: '2018 — 2022',
+      role: 'Assistant Store Manager',
+      place: 'Sportland Eesti AS · Tallinn',
+      layers: [],
+      summary:
+        "Progressed from cashier to assistant store manager, handling daily operations, staff training and the store's e-shop orders.",
+    },
   ],
 }
 

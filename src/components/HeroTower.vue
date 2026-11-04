@@ -42,14 +42,12 @@ const stackLine = Object.values(profile.stack)
           <span class="ph-deco ph-beacon" aria-hidden="true" />
           <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
         </div>
-        <!-- The intro hangs on a plain plaque from the bottom of the name sign. -->
+        <!-- The role and stack hang on a plain plaque from the bottom of the name sign. A label, not
+             a paragraph: the About chapter carries the longer introduction. -->
         <div class="kanban plaque sub">
           <span class="kb-deco kb-hang l" aria-hidden="true" />
           <span class="kb-deco kb-hang r" aria-hidden="true" />
-          <p class="intro">
-            <strong>Full-stack developer, interning right now.</strong> I build the interface and the system
-            behind it, and I care about both ends the same.
-          </p>
+          <p class="intro"><strong>Full-stack developer</strong></p>
           <p v-if="stackLine" class="stack-line">{{ stackLine }}</p>
         </div>
       </div>
@@ -1028,8 +1026,7 @@ h1 {
   }
 }
 /* Short phones (iPhone SE/8 class): tighten the top of the building so the entrance's buttons
-   clear the Fred Line bar on the first screen. The stack line is the one thing dropped; the
-   intro, the sign row and the windows above the canopy all stay. */
+   clear the Fred Line bar on the first screen. The plaque is short enough to keep its stack line. */
 @media (max-width: 719px) and (max-height: 700px) {
   .hero-grid {
     padding-top: 46px;
@@ -1039,9 +1036,6 @@ h1 {
   }
   h1 {
     font-size: 2.6rem;
-  }
-  .stack-line {
-    display: none;
   }
 }
 @media (max-width: 959px) and (prefers-reduced-motion: reduce) {

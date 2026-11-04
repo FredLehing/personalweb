@@ -16,6 +16,7 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
         <li v-for="layer in entry.layers" :key="layer">{{ layerName[layer] }}</li>
       </ul>
       <span v-else-if="entry.milestone" class="milestone">{{ entry.milestone }}</span>
+      <p v-if="entry.summary" class="summary">{{ entry.summary }}</p>
     </li>
   </ol>
 </template>
@@ -29,7 +30,7 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
 .row {
   display: grid;
   grid-template-columns: 110px minmax(0, 1fr) auto;
-  gap: 20px;
+  column-gap: 20px;
   align-items: baseline;
   padding: 20px 0;
   border-top: 1px solid var(--color-rule);
@@ -50,6 +51,17 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
 .place {
   margin-top: 4px;
   font-size: 15px;
+  color: var(--color-muted);
+}
+/* Body copy on its own row under the role, spanning past the chips so it never wraps into a
+   narrow column beside them. On phones it follows the chips. */
+.summary {
+  grid-column: 2 / -1;
+  margin-top: 10px;
+  max-width: 62ch;
+  font-size: 15px;
+  line-height: 1.6;
+  text-wrap: pretty;
   color: var(--color-muted);
 }
 .ph {
@@ -95,6 +107,10 @@ const layerName: Record<Layer, string> = { frontend: 'Frontend', backend: 'Backe
   .row {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
+  }
+  .summary {
+    grid-column: 1;
+    margin-top: 6px;
   }
 }
 </style>
