@@ -55,16 +55,18 @@ const secondary = computed(() =>
   font-weight: 600;
   text-decoration: none;
   transition:
-    background 0.3s var(--ease-out-expo),
-    transform 0.2s var(--ease-out-expo);
+    background 180ms ease,
+    transform 120ms var(--ease-out-expo);
 }
 /* Amber-on-amber would vanish, so selected text on the amber button glows dark instead. */
 .email:not(.soon)::selection {
   color: var(--color-action-ink);
   text-shadow: 0 0 8px rgb(0 0 0 / 0.35);
 }
-.email:hover {
-  background: var(--color-action-hover);
+@media (hover: hover) and (pointer: fine) {
+  .email:hover {
+    background: var(--color-action-hover);
+  }
 }
 .email:active {
   transform: scale(0.98);
@@ -89,8 +91,10 @@ const secondary = computed(() =>
   border: 1px dashed var(--color-rule-strong);
   cursor: not-allowed;
 }
-.email.soon:hover {
-  background: none;
+@media (hover: hover) and (pointer: fine) {
+  .email.soon:hover {
+    background: none;
+  }
 }
 .email.soon:active {
   transform: none;
@@ -106,10 +110,12 @@ const secondary = computed(() =>
   text-decoration: underline;
   text-decoration-color: var(--color-rule-strong);
   text-underline-offset: 3px;
-  transition: color 0.2s var(--ease-out-expo), text-decoration-color 0.2s var(--ease-out-expo);
+  transition: color 180ms ease, text-decoration-color 180ms ease;
 }
-.also a:hover {
-  color: var(--color-action);
-  text-decoration-color: var(--color-action);
+@media (hover: hover) and (pointer: fine) {
+  .also a:hover {
+    color: var(--color-action);
+    text-decoration-color: var(--color-action);
+  }
 }
 </style>

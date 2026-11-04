@@ -71,11 +71,12 @@ const primaryKey = computed(
      and reads as part of it. */
   background: rgb(11 14 26 / 0.92);
   box-shadow: inset 0 0 0 1px var(--color-rule-strong);
+  /* Colour changes are quick and plain; the press lands inside 120ms. */
   transition:
-    background 0.3s var(--ease-out-expo),
-    box-shadow 0.3s var(--ease-out-expo),
-    color 0.3s var(--ease-out-expo),
-    transform 0.2s var(--ease-out-expo);
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 120ms var(--ease-out-expo);
 }
 /* Live links share one width so GitHub and LinkedIn read as a matched pair. */
 a.btn {
@@ -83,9 +84,12 @@ a.btn {
   padding: 0 16px;
   justify-content: center;
 }
-.btn:hover {
-  color: var(--color-action);
-  box-shadow: inset 0 0 0 1px var(--color-action);
+/* Mouse only: a tap would leave the button stuck amber. */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    color: var(--color-action);
+    box-shadow: inset 0 0 0 1px var(--color-action);
+  }
 }
 .btn:active {
   transform: scale(0.98);
@@ -110,9 +114,11 @@ a.btn {
   color: var(--color-action-ink);
   text-shadow: 0 0 8px rgb(0 0 0 / 0.35);
 }
-.btn.primary:hover {
-  background: var(--color-action-hover);
-  color: var(--color-action-ink);
+@media (hover: hover) and (pointer: fine) {
+  .btn.primary:hover {
+    background: var(--color-action-hover);
+    color: var(--color-action-ink);
+  }
 }
 
 @media (max-width: 959px) {
