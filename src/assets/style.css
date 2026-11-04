@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Tokens: a rainy Tokyo night. Glow belongs to the five neon colours only; amber is the action colour.
+/* Tokens: a rainy Tokyo night. Glow belongs to the six neon colours only; amber is the action colour.
    `static` keeps every token in the output: the neon colours are referenced dynamically (var(--color-neon-*)). */
 @theme static {
   --color-night: #0b0e1a;
@@ -20,6 +20,7 @@
   --color-neon-pink: #ff4fa3;
   --color-neon-cyan: #3fe0e8;
   --color-neon-amber: #ffb547;
+  --color-neon-vermilion: #ff5a45;
   --color-neon-violet: #a98bff;
   --color-neon-lime: #b8ff6a;
 
