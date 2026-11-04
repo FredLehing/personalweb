@@ -19,17 +19,93 @@ const [about, work, dream, contact] = stations as [
 const year = new Date().getFullYear()
 
 // The street reflection is as wide as the sign. The tower column is sized by the sign, so its width is the sign's.
+const hero = ref<HTMLElement | null>(null)
 const tower = ref<HTMLElement | null>(null)
+const facade = ref<HTMLElement | null>(null)
 const signWidth = ref(0)
+
+// Desktop facade, laid out from the live tower because its width and the sign's height follow the
+// viewport. Floors are 34px, counted from the top of the tower body (the floor lines in CSS use the
+// same rhythm). Windows are upright panes on a fixed column grid: two columns in the wall either side
+// of the sign, a full row below it, stopping before the street's fade. AC units hang on three floors.
+// The edge light takes each segment's colour at that segment's height.
+type Pane = { x: number; y: number; lit: '' | 'c' | 'w' }
+const FLOOR = 34
+const STREET = 88
+const panes = ref<Pane[]>([])
+const acUnits = ref<{ x: number; y: number }[]>([])
+const edgeStyle = ref<Record<string, string>>({})
+
+function layoutFacade() {
+  const t = tower.value
+  const f = facade.value
+  const h = hero.value
+  const sign = t?.querySelector('nav')
+  if (!t || !f || !h || !sign || !window.matchMedia('(min-width: 960px)').matches) {
+    panes.value = []
+    acUnits.value = []
+    edgeStyle.value = {}
+    return
+  }
+  const top = t.getBoundingClientRect().top
+  const signBox = sign.getBoundingClientRect()
+  const signTop = signBox.top - top
+  const signBottom = signBox.bottom - top
+  const streetTop = h.getBoundingClientRect().bottom - STREET - top
+  const W = f.offsetWidth
+  const wall = (W - t.offsetWidth) / 2 // the stretch of facade either side of the sign
+
+  // Same seeded generator every time, so the lit windows never shuffle between loads.
+  let seed = 9
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+  const side = wall >= 37 ? [11, 25] : wall >= 20 ? [Math.round((wall - 6) / 2)] : []
+  const sideX = [...side, ...side.map((x) => W - x - 6)]
+  const n = Math.max(4, Math.round((W - 22) / 23))
+  const belowX = Array.from({ length: n }, (_, i) => Math.round(11 + (i * (W - 28)) / (n - 1)))
+  const out: Pane[] = []
+  for (let floor = 1; floor * FLOOR + 22 <= streetTop; floor++) {
+    const y = floor * FLOOR + 11
+    for (const x of y + 11 > signTop && y < signBottom ? sideX : belowX) {
+      const r = rnd()
+      out.push({ x, y, lit: r < 0.13 ? 'w' : r < 0.24 ? 'c' : '' })
+    }
+  }
+  panes.value = out
+
+  const firstBelow = Math.ceil(signBottom / FLOOR)
+  acUnits.value = [
+    { x: 6, y: (firstBelow + 1) * FLOOR + 8 },
+    { x: W - 22, y: (firstBelow + 3) * FLOOR + 8 },
+    ...(wall >= 26 ? [{ x: W - 22, y: Math.floor((signBottom - 35) / FLOOR) * FLOOR + 8 }] : []),
+  ].filter((u) => u.y + 11 <= streetTop)
+
+  const stops = ['transparent 0']
+  sign.querySelectorAll('.seg').forEach((seg, i) => {
+    const box = seg.getBoundingClientRect()
+    const color = stations[i] ? neonVar(stations[i].color) : 'transparent'
+    stops.push(`${color} ${box.top - top + 12}px ${box.bottom - top - 12}px`)
+  })
+  stops.push(`transparent ${signBottom + 115}px`)
+  edgeStyle.value = {
+    '--edge-grad': `linear-gradient(${stops.join(', ')})`,
+    '--edge-h': `${signBottom + 115}px`,
+  }
+}
+
 let observer: ResizeObserver | undefined
 onMounted(() => {
-  if (!tower.value) return
-  observer = new ResizeObserver(([entry]) => {
-    if (entry) signWidth.value = entry.contentRect.width
+  if (!tower.value || !hero.value) return
+  observer = new ResizeObserver((entries) => {
+    for (const entry of entries) if (entry.target === tower.value) signWidth.value = entry.contentRect.width
+    layoutFacade()
   })
   observer.observe(tower.value)
+  observer.observe(hero.value)
 })
 onBeforeUnmount(() => observer?.disconnect())
+
+// The roof's top floor: 0 dark, 1 cool, 2 warm.
+const crownWindows = '1020012'
 
 // Confirmed stack only; placeholders like "[from CV]" never reach the hero.
 const stackLine = Object.values(profile.stack)
@@ -46,7 +122,7 @@ const towerWindows = '01000020100000010200100000102001'
   <RouteLine />
 
   <div class="page">
-    <header id="top" class="hero">
+    <header id="top" ref="hero" class="hero">
       <SkylineArt />
 
       <div class="hero-grid">
@@ -72,14 +148,39 @@ const towerWindows = '01000020100000010200100000102001'
           </div>
         </div>
 
-        <div ref="tower" class="tower">
-          <!-- Building detail: a rooftop with an aircraft light, a few dim windows below the sign,
-               the sign's transformer box with its conduit, and the name's cyan falling on the
-               wall beside it. The sign is bolted flat to the facade. All dimmer than the sign. -->
+        <div ref="tower" class="tower" :style="edgeStyle">
+          <!-- Building detail: a stepped crown with the mast and aircraft light on top and two
+               condensers on the roof, floor lines and a grid of windows down the facade, AC units,
+               the sign's transformer box with its conduit, the name's cyan on the wall beside it, and
+               the sign's colours running down both corners. The sign is bolted flat to the facade.
+               All dimmer than the sign. -->
           <div class="tw-deco tw-roof" aria-hidden="true">
-            <span class="tw-mast" />
-            <span class="tw-beacon" />
+            <div class="tw-tier t1">
+              <div class="tw-crown-wins">
+                <span v-for="(w, i) in crownWindows" :key="i" :class="{ cool: w === '1', warm: w === '2' }" />
+              </div>
+              <div class="tw-tier t2">
+                <span class="tw-mast" />
+                <span class="tw-beacon" />
+              </div>
+            </div>
+            <span class="tw-condenser l" />
+            <span class="tw-condenser r" />
           </div>
+          <div ref="facade" class="tw-deco tw-facade" aria-hidden="true">
+            <span
+              v-for="(p, i) in panes"
+              :key="`p${i}`"
+              class="tw-pane"
+              :class="p.lit"
+              :style="{ left: `${p.x}px`, top: `${p.y}px` }"
+            />
+            <span v-for="(u, i) in acUnits" :key="`ac${i}`" class="tw-ac" :style="{ left: `${u.x}px`, top: `${u.y}px` }" />
+          </div>
+          <span class="tw-deco tw-edge l halo" aria-hidden="true" />
+          <span class="tw-deco tw-edge r halo" aria-hidden="true" />
+          <span class="tw-deco tw-edge l" aria-hidden="true" />
+          <span class="tw-deco tw-edge r" aria-hidden="true" />
           <div class="tw-deco tw-windows" aria-hidden="true">
             <span v-for="(w, i) in towerWindows" :key="i" :class="{ cool: w === '1', warm: w === '2' }" />
           </div>
@@ -445,6 +546,134 @@ h1 {
     transparent 75%
   );
 }
+/* Stepped crown: two setback floors on the roof, the mast and aircraft light on the top one. */
+.tw-tier {
+  position: absolute;
+  bottom: 100%;
+  background: var(--color-tower);
+  box-shadow: inset 0 0 0 1px #20263d;
+}
+.tw-tier.t1 {
+  left: 16px;
+  right: 16px;
+  height: 24px;
+}
+.tw-tier.t2 {
+  left: 50%;
+  width: max(calc(100% - 64px), 36px);
+  height: 20px;
+  transform: translateX(-50%);
+}
+/* The lower setback's row of windows: upright panes, dark glass unless lit. */
+.tw-crown-wins {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 8px;
+  height: 9px;
+  display: flex;
+  justify-content: center;
+  gap: 13px;
+  overflow: hidden;
+}
+.tw-crown-wins span {
+  flex: none;
+  width: 5px;
+  height: 9px;
+  background: #151a2c;
+}
+.tw-crown-wins .cool {
+  background: rgb(207 224 255 / 0.2);
+}
+.tw-crown-wins .warm {
+  background: rgb(255 212 138 / 0.34);
+}
+/* Condenser units standing on the main roof, either side of the crown. */
+.tw-condenser {
+  position: absolute;
+  bottom: 100%;
+  width: 20px;
+  height: 9px;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, #1a1f33 0 2px, #262c45 2px 4px) 3px 3px / 14px 3px no-repeat,
+    #20263d;
+  box-shadow:
+    inset 0 1px 0 #39415f,
+    0 0 0 1px #151a2c;
+}
+.tw-condenser.l { left: 6px; }
+.tw-condenser.r { right: 10px; }
+
+/* The facade grid, as wide as the tower body; panes and AC units are placed by layoutFacade(). */
+.tw-facade {
+  position: absolute;
+  top: 0;
+  left: calc(-1 * var(--tower-overhang));
+  width: calc(100% + 2 * var(--tower-overhang));
+  height: 0;
+}
+.tw-pane {
+  position: absolute;
+  width: 6px;
+  height: 11px;
+  background: #151a2c;
+}
+.tw-pane.c {
+  background: #cfe0ff;
+  opacity: 0.22;
+}
+.tw-pane.w {
+  background: #ffd48a;
+  opacity: 0.34;
+}
+.tw-ac {
+  position: absolute;
+  width: 16px;
+  height: 11px;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, #1a1f33 0 2px, #262c45 2px 4px) 3px 3px / 10px 5px no-repeat,
+    #20263d;
+  box-shadow:
+    inset 0 1px 0 #39415f,
+    0 0 0 1px #151a2c;
+}
+
+/* Edge light: a 2px line on each corner of the tower, in each segment's colour at that segment's
+   height, blending between them and fading out above and below the sign, with a soft halo. */
+.tw-edge {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: var(--edge-h, 0);
+  background: var(--edge-grad, none);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.tw-edge.l { left: calc(-1 * var(--tower-overhang) - 1px); }
+.tw-edge.r { right: calc(-1 * var(--tower-overhang)); }
+.tw-edge.halo {
+  width: 8px;
+  opacity: 0.28;
+  filter: blur(4px);
+}
+.tw-edge.l.halo { left: calc(-1 * var(--tower-overhang) - 4px); }
+.tw-edge.r.halo { right: calc(-1 * var(--tower-overhang) - 3px); }
+
+/* Floor lines on the tower body: a 1px lip over a 1px shadow line every 34px, quieter than the
+   windows. Desktop replaces the scattered windows with the facade grid above. */
+@media (min-width: 960px) {
+  .tower::before {
+    background:
+      repeating-linear-gradient(transparent 0 32px, #1b2137 32px 33px, #0b0e19 33px 34px),
+      var(--color-tower);
+  }
+  .tw-windows {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tw-beacon {
     animation: none;
@@ -740,7 +969,10 @@ h1 {
     left: -8px;
     right: -8px;
   }
-  .tw-roof > span,
+  .tw-tier,
+  .tw-condenser,
+  .tw-facade,
+  .tw-edge,
   .tw-spill {
     display: none;
   }
