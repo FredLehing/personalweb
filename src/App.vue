@@ -22,16 +22,17 @@ const year = new Date().getFullYear()
 const hero = ref<HTMLElement | null>(null)
 const tower = ref<HTMLElement | null>(null)
 const facade = ref<HTMLElement | null>(null)
+const street = ref<HTMLElement | null>(null)
 const signWidth = ref(0)
 
-// Desktop facade, laid out from the live tower because its width and the sign's height follow the
-// viewport. Floors are 34px, counted from the top of the tower body (the floor lines in CSS use the
+// The facade, laid out from the live tower because its width and the sign's height follow the
+// viewport. On phones and tablets the same grid fills the wall the plaque and entrance leave free,
+// so a tall screen shows more building instead of a blank wall. Floors are 34px, counted from the top of the tower body (the floor lines in CSS use the
 // same rhythm). Windows are upright panes on a fixed column grid: two columns in the wall either side
 // of the sign, a full row below it, stopping before the street's fade. AC units hang on three floors.
 // The edge light takes each segment's colour at that segment's height.
 type Pane = { x: number; y: number; lit: '' | 'c' | 'w' }
 const FLOOR = 34
-const STREET = 88
 const panes = ref<Pane[]>([])
 const acUnits = ref<{ x: number; y: number }[]>([])
 const edgeStyle = ref<Record<string, string>>({})
@@ -39,9 +40,9 @@ const edgeStyle = ref<Record<string, string>>({})
 function layoutFacade() {
   const t = tower.value
   const f = facade.value
-  const h = hero.value
+  const h = street.value
   const sign = t?.querySelector('nav')
-  if (!t || !f || !h || !sign || !window.matchMedia('(min-width: 960px)').matches) {
+  if (!t || !f || !h || !sign) {
     panes.value = []
     acUnits.value = []
     edgeStyle.value = {}
@@ -51,7 +52,7 @@ function layoutFacade() {
   const signBox = sign.getBoundingClientRect()
   const signTop = signBox.top - top
   const signBottom = signBox.bottom - top
-  const streetTop = h.getBoundingClientRect().bottom - STREET - top
+  const streetTop = h.getBoundingClientRect().top - top
   const W = f.offsetWidth
   const wall = (W - t.offsetWidth) / 2 // the stretch of facade either side of the sign
 
@@ -60,8 +61,18 @@ function layoutFacade() {
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
   const side = wall >= 37 ? [11, 25] : wall >= 20 ? [Math.round((wall - 6) / 2)] : []
   const sideX = [...side, ...side.map((x) => W - x - 6)]
-  const n = Math.max(4, Math.round((W - 22) / 23))
-  const belowX = Array.from({ length: n }, (_, i) => Math.round(11 + (i * (W - 28)) / (n - 1)))
+  // Below the sign. The desktop body (about 200px) takes one even row of about eight. A wider body
+  // (phones, tablets) groups them in bays, two panes 5px apart with 20px of wall between bays, so a
+  // broad facade reads as a building rather than an even field of dashes.
+  let belowX: number[]
+  if (W <= 260) {
+    const n = Math.max(4, Math.round((W - 22) / 23))
+    belowX = Array.from({ length: n }, (_, i) => Math.round(11 + (i * (W - 28)) / (n - 1)))
+  } else {
+    const bays = Math.floor((W - 22 + 20) / 37)
+    const start = Math.round((W - (bays * 37 - 20)) / 2)
+    belowX = Array.from({ length: bays }, (_, i) => [start + i * 37, start + i * 37 + 11]).flat()
+  }
   const out: Pane[] = []
   for (let floor = 1; floor * FLOOR + 22 <= streetTop; floor++) {
     const y = floor * FLOOR + 11
@@ -70,7 +81,20 @@ function layoutFacade() {
       out.push({ x, y, lit: r < 0.13 ? 'w' : r < 0.24 ? 'c' : '' })
     }
   }
-  panes.value = out
+  // Keep panes 6px clear of everything hung on the facade (the sign, and on phones the plaque and
+  // the entrance), so no row gets squeezed into a thin gap. Desktop's side plaques sit off the body.
+  const left = f.getBoundingClientRect().left
+  // The entrance's canopy stands 8px proud of its box, so it gets 8px more room on top.
+  const hung = [sign, hero.value?.querySelector('.kanban.sub'), hero.value?.querySelector('.act')]
+    .filter((el): el is Element => !!el)
+    .map((el) => ({ box: el.getBoundingClientRect(), extra: el.classList.contains('act') ? 8 : 0 }))
+    .map(({ box: b, extra }) => ({
+      l: b.left - left - 6 - extra,
+      r: b.right - left + 6 + extra,
+      t: b.top - top - 6 - extra,
+      b: b.bottom - top + 6,
+    }))
+  panes.value = out.filter(({ x, y }) => !hung.some((o) => x + 6 > o.l && x < o.r && y + 11 > o.t && y < o.b))
 
   const firstBelow = Math.ceil(signBottom / FLOOR)
   acUnits.value = [
@@ -112,9 +136,6 @@ const stackLine = Object.values(profile.stack)
   .flat()
   .filter((t) => !isPlaceholder(t))
   .join(' · ')
-
-// The tower's windows below the sign, four to a floor: 0 dark, 1 cool, 2 warm. Kept sparse.
-const towerWindows = '01000020100000010200100000102001'
 </script>
 
 <template>
@@ -181,9 +202,6 @@ const towerWindows = '01000020100000010200100000102001'
           <span class="tw-deco tw-edge r halo" aria-hidden="true" />
           <span class="tw-deco tw-edge l" aria-hidden="true" />
           <span class="tw-deco tw-edge r" aria-hidden="true" />
-          <div class="tw-deco tw-windows" aria-hidden="true">
-            <span v-for="(w, i) in towerWindows" :key="i" :class="{ cool: w === '1', warm: w === '2' }" />
-          </div>
           <span class="tw-deco tw-spill" aria-hidden="true" />
           <span class="tw-deco tw-ballast" aria-hidden="true" />
           <span class="tw-deco tw-conduit" aria-hidden="true" />
@@ -205,7 +223,7 @@ const towerWindows = '01000020100000010200100000102001'
       <!-- Wet street at the foot of the skyline. Only signs close to the ground throw their colour
            onto it: on desktop the segments stack, so only the lowest (Contact) reflects; on phones
            they hang side by side at one height, so all four do. -->
-      <div class="street" aria-hidden="true">
+      <div ref="street" class="street" aria-hidden="true">
         <div class="street-grid">
           <div class="refl" :style="{ width: signWidth ? `${signWidth}px` : undefined }">
             <span v-for="s in stations" :key="s.id" :style="{ '--c': neonVar(s.color) }" />
@@ -475,28 +493,6 @@ h1 {
   80% { opacity: 1; }
   100% { opacity: 1; }
 }
-.tw-windows {
-  position: absolute;
-  top: calc(100% + 36px);
-  left: calc(-1 * var(--tower-overhang) + 16px);
-  right: calc(-1 * var(--tower-overhang) + 16px);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  row-gap: 22px;
-  justify-items: center;
-}
-.tw-windows span {
-  width: 9px;
-  height: 6px;
-}
-.tw-windows .cool {
-  background: #cfe0ff;
-  opacity: 0.22;
-}
-.tw-windows .warm {
-  background: #ffd48a;
-  opacity: 0.32;
-}
 /* The sign is bolted flat to the facade: one bolt head in each corner of its frame. */
 .tw-bolts {
   position: absolute;
@@ -661,17 +657,11 @@ h1 {
 .tw-edge.l.halo { left: calc(-1 * var(--tower-overhang) - 4px); }
 .tw-edge.r.halo { right: calc(-1 * var(--tower-overhang) - 3px); }
 
-/* Floor lines on the tower body: a 1px lip over a 1px shadow line every 34px, quieter than the
-   windows. Desktop replaces the scattered windows with the facade grid above. */
-@media (min-width: 960px) {
-  .tower::before {
-    background:
-      repeating-linear-gradient(transparent 0 32px, #1b2137 32px 33px, #0b0e19 33px 34px),
-      var(--color-tower);
-  }
-  .tw-windows {
-    display: none;
-  }
+/* Floor lines on the tower body: a 1px lip over a 1px shadow line every 34px, quieter than the windows. */
+.tower::before {
+  background:
+    repeating-linear-gradient(transparent 0 32px, #1b2137 32px 33px, #0b0e19 33px 34px),
+    var(--color-tower);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -894,7 +884,7 @@ h1 {
   }
   .hero-grid {
     /* The tower's width: the city shows on both sides, and it stops growing on tablets. */
-    --tw: min(calc(100% - 2 * clamp(32px, calc(36vw - 94px), 48px)), 340px);
+    --tw: min(calc(100% - 2 * clamp(32px, calc(36vw - 94px), 48px)), clamp(340px, 46vw, 400px));
     --tower-overhang: 0px;
     display: flex;
     flex-direction: column;
@@ -906,12 +896,18 @@ h1 {
   .board {
     display: contents;
   }
+  /* Tablets get a bigger tower (--tw), so the type grows with it; phones keep the floor sizes. */
+  h1 {
+    font-size: clamp(3rem, 7.4vw, 4rem);
+  }
 
   /* Rooftop sign (屋上看板): the name, on a lattice of steel legs standing on the roof. */
   .name-sign {
     order: 1;
     width: calc(var(--tw) - 8px);
-    margin-bottom: 36px; /* 24px of legs, then the 12px roof */
+    /* 24px of legs, then the 12px roof. The hero grid's gap is taken back out here, so the legs
+       stand on the roof instead of hanging over a gap. */
+    margin-bottom: calc(36px - var(--hero-gap));
     padding: 14px 12px 16px;
     border-radius: 18px;
   }
@@ -971,21 +967,13 @@ h1 {
   }
   .tw-tier,
   .tw-condenser,
-  .tw-facade,
+  .tw-ac,
   .tw-edge,
   .tw-spill {
     display: none;
   }
   .tw-bolts {
     inset: var(--sign-top) 8px 0;
-  }
-  /* One floor of windows between the sign and the plaque. */
-  .tw-windows {
-    top: calc(100% + 20px);
-    grid-template-columns: repeat(8, 1fr);
-  }
-  .tw-windows span:nth-child(n + 9) {
-    display: none;
   }
 
   /* The intro plaque, bolted to the facade under the sign. Its top edge catches the row's light. */
@@ -997,6 +985,20 @@ h1 {
     /* The canopy keeps its breathing room under the plaque however short the screen. */
     margin-bottom: 26px;
     padding: 14px 12px 16px;
+  }
+  /* Bolted like the sign row above it: a bolt head in each corner of the rim. */
+  .kanban.sub::before {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: calc(-1 * var(--rim));
+    pointer-events: none;
+    --bolt: radial-gradient(circle, #4a5373 0 1.1px, #2a3150 1.5px 2.3px, transparent 2.7px);
+    background:
+      var(--bolt) 1px 1px / 8px 8px no-repeat,
+      var(--bolt) calc(100% - 1px) 1px / 8px 8px no-repeat,
+      var(--bolt) 1px calc(100% - 1px) / 8px 8px no-repeat,
+      var(--bolt) calc(100% - 1px) calc(100% - 1px) / 8px 8px no-repeat;
   }
   .kanban.sub::after {
     content: '';
@@ -1018,7 +1020,7 @@ h1 {
   }
   .sub .intro {
     max-width: none;
-    font-size: 14px;
+    font-size: clamp(14px, 2.1vw, 16px);
     line-height: 1.5;
   }
   .stack-line {
@@ -1096,6 +1098,62 @@ h1 {
   .refl span {
     opacity: 0.3;
     filter: blur(5px);
+  }
+}
+/* ───────── tablets: the actions hang off the tower's side wall ─────────
+   From 720px there is room beside the tower (about 190px at 720, 220px at 820), so the actions
+   leave the entrance and hang off the right wall on two steel brackets, as on desktop. The
+   building then runs straight down to the street, and the window grid fills the lower floors.
+   Narrower phones keep the entrance: there is only about 46px of city each side. */
+@media (min-width: 720px) and (max-width: 959px) {
+  .act {
+    position: absolute;
+    top: 56%;
+    left: calc(50% + var(--tw) / 2 + 16px);
+    width: min(210px, calc((100% - var(--tw)) / 2 - 32px));
+    margin: 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    transform: translateY(-50%);
+    align-items: stretch;
+  }
+  .act::before {
+    display: none;
+  }
+  .act .plaque {
+    --reach: 16px;
+    padding: 18px;
+    border: 3px solid #151a2c;
+    border-radius: 6px;
+    background: var(--color-sign);
+    box-shadow:
+      0 0 0 1px #252b45,
+      inset 0 0 0 1px #2a3048;
+  }
+  .act .kb-mount {
+    display: block;
+  }
+  .act .plaque :deep(.actions.stack) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .act .plaque :deep(a.btn) {
+    flex: none;
+  }
+  .status {
+    margin: 16px 0 0;
+    max-width: none;
+    text-align: left;
+  }
+}
+/* Phones: the plaque sits close under the sign row. The gap there is too short for a floor of
+   windows, so instead of a strip of blank wall the plaque moves up and the freed height becomes
+   windows above the entrance. */
+@media (max-width: 719px) {
+  .kanban.sub {
+    margin-top: calc(22px - var(--hero-gap));
   }
 }
 @media (max-width: 959px) and (prefers-reduced-motion: reduce) {
