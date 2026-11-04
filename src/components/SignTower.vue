@@ -126,21 +126,34 @@ onMounted(() => {
 }
 
 /* Each lit segment throws its colour onto the frame and the tower wall around it, and throws
-   more of it when pointed at, so the highlight spreads onto the building. Desktop only: on
-   phones the sign is a row with no wall behind it. */
-@media (min-width: 960px) {
+   more of it when pointed at, so the highlight spreads onto the building. On phones the row
+   hangs on the facade too, so it spills the same way, a little tighter. */
+.seg.on {
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent),
+    0 0 72px 12px color-mix(in srgb, var(--c) 24%, transparent);
+}
+.seg.on:hover,
+.seg.on:focus-visible,
+.seg.on.lit {
+  box-shadow:
+    inset 0 0 0 1.5px var(--c),
+    0 0 40px -2px color-mix(in srgb, var(--c) 70%, transparent),
+    0 0 96px 20px color-mix(in srgb, var(--c) 34%, transparent);
+}
+@media (max-width: 959px) {
   .seg.on {
     box-shadow:
       inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent),
-      0 0 72px 12px color-mix(in srgb, var(--c) 24%, transparent);
+      0 0 56px 10px color-mix(in srgb, var(--c) 22%, transparent);
   }
   .seg.on:hover,
   .seg.on:focus-visible,
   .seg.on.lit {
     box-shadow:
       inset 0 0 0 1.5px var(--c),
-      0 0 40px -2px color-mix(in srgb, var(--c) 70%, transparent),
-      0 0 96px 20px color-mix(in srgb, var(--c) 34%, transparent);
+      0 0 32px -2px color-mix(in srgb, var(--c) 70%, transparent),
+      0 0 80px 16px color-mix(in srgb, var(--c) 32%, transparent);
   }
 }
 
@@ -167,8 +180,8 @@ onMounted(() => {
   }
   .label {
     writing-mode: horizontal-tb;
-    font-size: 10.5px;
-    letter-spacing: 0.06em;
+    font-size: 11px;
+    letter-spacing: 0.04em;
     white-space: nowrap;
   }
 }
