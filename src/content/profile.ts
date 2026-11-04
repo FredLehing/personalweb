@@ -9,6 +9,8 @@ export interface ExperienceEntry {
   role: string
   place: string
   layers: Layer[]
+  /** Marks a turning point in the path (e.g. the retraining that started the dev career). */
+  milestone?: string
 }
 
 export interface Profile {
@@ -18,7 +20,7 @@ export interface Profile {
   availability: string
   /** Address the Contact chapter's main button mails, or null while it hasn't been chosen. */
   email: string | null
-  /** Path to the CV PDF in /public, or null while it hasn't been added. */
+  /** Path to the CV PDF under /public, or null while it hasn't been added. */
   cvUrl: string | null
   links: { linkedin: string | null; github: string | null }
   stack: Record<Layer, string[]>
@@ -28,24 +30,39 @@ export interface Profile {
 export const profile: Profile = {
   name: 'Fred Lehing',
   role: 'Full-stack developer',
-  status: 'Full-stack intern at [Company]',
-  availability: 'open to a first full-time role',
+  status: 'Junior Software Engineer intern at BCS Koolitus',
+  availability: 'open to junior dev roles',
   email: 'lehingfred@gmail.com',
-  cvUrl: null,
+  cvUrl: '/cv/Fred_Lehing_CV_ENG.pdf',
   links: {
     linkedin: 'https://www.linkedin.com/in/fredlehing/',
     github: 'https://github.com/FredLehing',
   },
-  // Frontend is evidenced by this project's own stack; backend and data wait for the CV.
+  // The hero flattens these in key order, so backend leads. Only the core of the CV's stack;
+  // the full list lives in the CV itself.
   stack: {
-    frontend: ['Vue', 'TypeScript', 'Tailwind CSS'],
-    backend: ['[from CV]'],
-    data: ['[from CV]'],
+    backend: ['Java', 'Spring Boot', 'Spring AI'],
+    data: ['PostgreSQL'],
+    frontend: ['Vue', 'TypeScript'],
   },
-  // Empty `layers` renders a marked placeholder until the CV confirms them.
+  // Non-engineering roles have empty `layers` and show no stack chips.
   experience: [
-    { period: '[Start] —', role: 'Full-stack intern', place: '[Company] · [City]', layers: [] },
-    { period: '[Year]', role: '[Earlier role or project from CV]', place: '[Place]', layers: [] },
+    {
+      period: '2026 —',
+      role: 'Junior Software Engineer Intern',
+      place: 'BCS Koolitus AS · Tallinn',
+      layers: ['frontend', 'backend', 'data'],
+    },
+    {
+      period: '2026',
+      role: 'Junior Full-Stack AI Developer program',
+      place: 'Vali IT! · Tallinn',
+      layers: [],
+      milestone: 'Career change',
+    },
+    { period: '2024 — 2026', role: 'Senior Content Operations Specialist', place: 'Sportradar AG · Tallinn', layers: [] },
+    { period: '2022 — 2024', role: 'Amazon Listing Manager', place: 'NoCry OÜ · Tallinn', layers: [] },
+    { period: '2018 — 2022', role: 'Assistant Store Manager', place: 'Sportland Eesti AS · Tallinn', layers: [] },
   ],
 }
 

@@ -271,7 +271,7 @@ const stackLine = Object.values(profile.stack)
 
       <ChapterSection :station="contact">
         <p>
-          <strong>Looking for a first full-time role on a team that ships.</strong> If that sounds like your team, write to me.
+          <strong>Looking for a junior developer role on a team that ships.</strong> I also take on freelance projects. Either way, write to me.
         </p>
         <ContactLinks class="contact-actions" />
         <p class="terminus"><span lang="ja">終点</span> · End of the line</p>
