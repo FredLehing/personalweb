@@ -52,7 +52,7 @@ const towerWindows = '01000020100000010200100000102001'
       <div class="hero-grid">
         <div class="board">
           <!-- The name sign is side-mounted to the tower wall by two steel brackets. -->
-          <div class="kanban">
+          <div class="kanban name-sign">
             <span class="kb-deco kb-mount top" aria-hidden="true" />
             <span class="kb-deco kb-mount bot" aria-hidden="true" />
             <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
@@ -71,7 +71,8 @@ const towerWindows = '01000020100000010200100000102001'
 
         <div ref="tower" class="tower">
           <!-- Building detail: a rooftop with an aircraft light, a few dim windows below the sign,
-               and brackets fixing the sign to the building. All dimmer than the sign. -->
+               the sign's transformer box with its conduit, and the name's cyan falling on the
+               wall beside it. The sign is bolted flat to the facade. All dimmer than the sign. -->
           <div class="tw-deco tw-roof" aria-hidden="true">
             <span class="tw-mast" />
             <span class="tw-beacon" />
@@ -79,11 +80,11 @@ const towerWindows = '01000020100000010200100000102001'
           <div class="tw-deco tw-windows" aria-hidden="true">
             <span v-for="(w, i) in towerWindows" :key="i" :class="{ cool: w === '1', warm: w === '2' }" />
           </div>
-          <span class="tw-deco tw-bracket l top" aria-hidden="true" />
-          <span class="tw-deco tw-bracket r top" aria-hidden="true" />
-          <span class="tw-deco tw-bracket l bot" aria-hidden="true" />
-          <span class="tw-deco tw-bracket r bot" aria-hidden="true" />
+          <span class="tw-deco tw-spill" aria-hidden="true" />
+          <span class="tw-deco tw-ballast" aria-hidden="true" />
+          <span class="tw-deco tw-conduit" aria-hidden="true" />
           <SignTower />
+          <span class="tw-deco tw-bolts" aria-hidden="true" />
         </div>
 
         <div class="act">
@@ -292,10 +293,12 @@ h1 {
 }
 
 .tower {
+  /* Wall between the roof and the top of the sign: room for the transformer box and conduit. */
+  --sign-top: 40px;
   position: relative;
   display: flex;
   justify-content: center;
-  padding-top: 28px;
+  padding-top: var(--sign-top);
 }
 /* The tower's dark body, running down from behind the sign to the street. Sized from the sign
    (this column is exactly as wide as the sign) plus an overhang that fits inside the hero gap. */
@@ -378,27 +381,55 @@ h1 {
   background: #ffd48a;
   opacity: 0.32;
 }
-.tw-bracket {
+/* The sign is bolted flat to the facade: one bolt head in each corner of its frame. */
+.tw-bolts {
   position: absolute;
-  width: calc(var(--tower-overhang) - 6px);
-  height: 5px;
-  background: #252b45;
-  box-shadow: inset 0 1px 0 #39415f;
+  inset: var(--sign-top) 0 0;
+  pointer-events: none;
+  --bolt: radial-gradient(circle, #4a5373 0 1.1px, #2a3150 1.5px 2.3px, transparent 2.7px);
+  background:
+    var(--bolt) 1px 1px / 8px 8px no-repeat,
+    var(--bolt) calc(100% - 1px) 1px / 8px 8px no-repeat,
+    var(--bolt) 1px calc(100% - 1px) / 8px 8px no-repeat,
+    var(--bolt) calc(100% - 1px) calc(100% - 1px) / 8px 8px no-repeat;
 }
-.tw-bracket::after {
-  content: '';
+/* The neon's transformer box under the roof, feeding the sign through a short conduit. */
+.tw-ballast {
   position: absolute;
-  top: -3px;
+  top: 7px;
+  right: 8px;
+  width: 26px;
+  height: 14px;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 4px, #1a1f33 4px 5px) 5px 4px / 16px 6px no-repeat,
+    #20263d;
+  box-shadow:
+    inset 0 1px 0 #39415f,
+    0 0 0 1px #151a2c;
+}
+.tw-conduit {
+  position: absolute;
+  top: 21px;
+  right: 20px;
   width: 3px;
-  height: 11px;
-  background: #2a3150;
+  height: calc(var(--sign-top) - 21px);
+  background: #252b45;
+  box-shadow: inset 1px 0 0 #39415f;
 }
-.tw-bracket.l { right: 100%; }
-.tw-bracket.l::after { left: 0; }
-.tw-bracket.r { left: 100%; }
-.tw-bracket.r::after { right: 0; }
-.tw-bracket.top { top: 64px; }
-.tw-bracket.bot { bottom: 36px; }
+/* The name sign's cyan falling on the stretch of wall that faces it. */
+.tw-spill {
+  position: absolute;
+  top: calc(50% - 220px);
+  left: calc(-1 * var(--tower-overhang));
+  width: calc(var(--tower-overhang) + 16px);
+  height: 230px;
+  background: radial-gradient(
+    ellipse 100% 50% at 0% 50%,
+    color-mix(in srgb, var(--color-neon-cyan) 13%, transparent),
+    transparent 75%
+  );
+}
 @media (prefers-reduced-motion: reduce) {
   .tw-beacon {
     animation: none;
@@ -490,6 +521,59 @@ h1 {
 .kb-mount::after { right: 0; }
 .kb-mount.top { top: 24px; }
 .kb-mount.bot { bottom: 24px; }
+/* Light from the neon. The name sign's dark face catches its own cyan behind the letters, and
+   every side sign takes a faint wash, on the edge facing the tower, from the segments level
+   with it (top to bottom: pink About, amber Work, violet Dream, lime Contact). Screen-blended,
+   so text only gets lighter. Desktop only: phones have no tower beside the signs. */
+@media (min-width: 960px) {
+  .name-sign {
+    background: radial-gradient(
+      ellipse 70% 62% at 50% 50%,
+      color-mix(in srgb, var(--color-neon-cyan) 9%, var(--color-sign)),
+      var(--color-sign) 78%
+    );
+    box-shadow:
+      0 0 0 1px #252b45,
+      inset 0 0 0 1px color-mix(in srgb, var(--color-neon-cyan) 22%, #2a3048);
+  }
+  .kanban::after {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * var(--rim));
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--spill);
+    opacity: 0.16;
+    mix-blend-mode: screen;
+    /* Light falls off fast: strongest on the rim facing the tower, gone a third of the way in. */
+    -webkit-mask-image: linear-gradient(var(--spill-from), #000, rgb(0 0 0 / 0.35) 12%, transparent 36%);
+    mask-image: linear-gradient(var(--spill-from), #000, rgb(0 0 0 / 0.35) 12%, transparent 36%);
+  }
+  .board .kanban::after {
+    --spill-from: to left;
+  }
+  .act .kanban::after {
+    --spill-from: to right;
+  }
+  .name-sign {
+    --spill: linear-gradient(var(--color-neon-pink) 60%, var(--color-neon-amber));
+  }
+  .kanban.sub {
+    --spill: linear-gradient(
+      var(--color-neon-amber) 8%,
+      var(--color-neon-violet) 32% 58%,
+      var(--color-neon-lime) 80%
+    );
+  }
+  .act .plaque {
+    --spill: linear-gradient(
+      var(--color-neon-pink) 22%,
+      var(--color-neon-amber) 42% 70%,
+      var(--color-neon-violet) 92%
+    );
+  }
+}
+
 /* Name sign: the tower is on its right. */
 .board .kb-mount { right: calc(-1 * (var(--rim) + var(--reach))); }
 /* Actions plaque: the tower is on its left. */
