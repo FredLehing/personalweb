@@ -5,7 +5,8 @@ import type { Project } from '@/content/projects'
 
 // A platform screen: an LCD hung from the platform roof on two steel rods, in the tower sign's
 // housing. The departure strip carries the chapter kanji and the project number in the station
-// colour (printed, not neon, so no glow). Click-to-load: until play, only the YouTube thumbnail
+// colour (printed, not neon, so no glow), then the project's name as its heading, and the video's
+// length and state. The name appears once; the text under the screen is the description and facts. Click-to-load: until play, only the YouTube thumbnail
 // loads; play swaps in the youtube-nocookie player (fullscreen allowed). One screen plays at a
 // time; Esc stops it. The text below works without pressing play.
 const props = defineProps<{ project: Project; index: number }>()
@@ -45,7 +46,9 @@ const nowPlaying = ref<string | null>(null)
     <div class="housing">
       <div class="dep">
         <span class="no" lang="ja">作品<span>{{ no }}</span></span>
-        <span class="ttl" :class="{ ph: ph(project.title) }">{{ project.title }}</span>
+        <h3 class="ttl" :class="{ ph: ph(project.title) }">
+          {{ project.title }}<span v-if="project.context" class="context"> · {{ project.context }}</span>
+        </h3>
         <span class="meta">
           <span v-if="isPlaying" class="now"><span lang="ja">再生中</span> · Playing</span>
           <span v-else-if="project.duration" class="dur">{{ project.duration }}</span>
@@ -72,7 +75,6 @@ const nowPlaying = ref<string | null>(null)
     </div>
 
     <figcaption class="info">
-      <h3 :class="{ ph: ph(project.title) }">{{ project.title }}</h3>
       <p :class="{ ph: ph(project.summary) }">{{ project.summary }}</p>
       <dl class="facts">
         <dt>Role</dt>
@@ -151,12 +153,21 @@ const nowPlaying = ref<string | null>(null)
   margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
+/* The project's heading, printed on the strip like a departure board's destination. */
 .ttl {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  font: inherit;
+  /* The strip sets line-height 1; overflow: hidden would then clip descenders (g, p, j). */
+  line-height: 1.35;
   color: var(--color-ink);
   letter-spacing: 0.02em;
+}
+/* A label beside the name, not part of it: lighter and muted. */
+.context {
+  font-weight: 400;
+  color: var(--color-muted);
 }
 .meta {
   margin-left: auto;
@@ -256,15 +267,11 @@ const nowPlaying = ref<string | null>(null)
 /* Text below the screen. */
 .info {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* The facts column takes what it needs up to 20rem, then the stack pills wrap, so a long stack
+     never squeezes the description into a narrow strip. */
+  grid-template-columns: minmax(0, 1fr) fit-content(20rem);
   gap: 8px 32px;
   margin-top: 22px;
-}
-h3 {
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--color-ink);
 }
 .info p {
   grid-column: 1;
@@ -274,7 +281,7 @@ h3 {
 }
 .facts {
   grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   display: grid;
   grid-template-columns: max-content minmax(0, 1fr);
   gap: 10px 16px;

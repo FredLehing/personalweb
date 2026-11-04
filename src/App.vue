@@ -28,8 +28,21 @@ const year = new Date().getFullYear()
 
     <main>
       <ChapterSection :station="about">
-        <p class="ph">[A few lines about you in your own words: where you're from and what you do when you're not coding.]</p>
-        <p class="ph">[What you care about: how you like to work, what kind of software you want to build, what makes a team good to you.]</p>
+        <p>
+          <strong>I'm a full-stack developer with a project manager's view of the product.</strong> My background is in
+          operations and project management. Because of this, I think about the full product lifecycle, from planning
+          to launch and maintenance.
+        </p>
+        <p>
+          My interest in technology started when I built my first very own PC. I chose every part myself. At
+          Sportradar, I worked closely with developers. Their work made me want to build software. Then I completed the
+          Vali IT! retraining program.
+        </p>
+        <p>
+          I like products that are well planned, intuitive and efficient. I also want them to be maintainable. I enjoy
+          planning a feature before I write the code.
+        </p>
+        <p>In my free time, I play basketball and do endurance sports. I also enjoy video games.</p>
       </ChapterSection>
 
       <ChapterSection :station="work">
@@ -58,10 +71,10 @@ const year = new Date().getFullYear()
 
       <ChapterSection :station="contact">
         <p>
-          <strong>Looking for a junior developer role on a team that ships.</strong> I also take on freelance projects. Either way, write to me.
+          <strong>I'm looking for a junior developer role.</strong> I also take on freelance projects. Feel free to get in touch.
         </p>
         <ContactLinks class="contact-actions" />
-        <p class="terminus"><span lang="ja">終点</span> · End of the line</p>
+        <p class="terminus"><span lang="ja">終点</span> · End of the line. Thanks for visiting!</p>
       </ChapterSection>
     </main>
 

@@ -4,6 +4,8 @@
 export interface Project {
   id: string
   title: string
+  /** Where it was made (e.g. a course or a team), shown quietly beside the heading under the screen. */
+  context?: string
   /** What it is and who it's for, in a sentence or two. */
   summary: string
   role: string
@@ -32,12 +34,14 @@ export const projects: Project[] = [
     captions: false,
   },
   {
-    id: 'project-2',
-    title: '[Project name]',
-    summary: "[What it is and who it's for, in a sentence or two.]",
-    role: '[your part]',
-    stack: [],
-    repo: null,
+    id: 'bcs-koolitused',
+    title: 'BCS Koolitused',
+    context: 'Vali IT! group project',
+    summary:
+      'A prototype course platform for BCS Koolitus: visitors browse and register for trainings, participants get their courses and certificates, and admins run the catalogue. AI reads curriculum PDFs to fill in course details, in Estonian and English.',
+    role: 'Team captain. Built the AI PDF reader and end-to-end features.',
+    stack: ['Java', 'Spring Boot', 'Spring AI', 'PostgreSQL', 'Vue', 'Tailwind CSS'],
+    repo: 'https://github.com/FredLehing/bcs-koolitused',
     youtubeId: null,
     duration: null,
     captions: false,
