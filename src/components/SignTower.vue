@@ -176,11 +176,11 @@ onMounted(() => {
   }
   .kanji {
     align-self: center;
-    font-size: 1.25rem;
+    font-size: clamp(1.25rem, 3.4vw, 1.75rem);
   }
   .label {
     writing-mode: horizontal-tb;
-    font-size: 11px;
+    font-size: clamp(11px, 1.6vw, 13px);
     letter-spacing: 0.04em;
     white-space: nowrap;
   }
