@@ -1,9 +1,29 @@
 <script setup lang="ts">
-import { neonVar, type Station } from '@/content/stations'
+import { ref, watch } from 'vue'
+import { neonVar, stations, type Station } from '@/content/stations'
+import { useJourney } from '@/composables/useJourney'
+import { useReducedMotion } from '@/composables/useReducedMotion'
 
 // One stop on the Fred Line. The heading is a station nameboard: kanji and English name
 // at the same scale over a band in the line colour.
-defineProps<{ station: Station }>()
+// The kanji is an unlit tube until the visitor arrives at this station, then it switches on with
+// the signs' stepped flicker and stays on while they travel between chapters. Back at the Start
+// the line resets: every station goes dark (a plain cut, as neon does) and lights again on the
+// next trip down. The English name never dims. Reduced motion: lit from the start.
+const props = defineProps<{ station: Station }>()
+
+const { active } = useJourney()
+const reduced = useReducedMotion()
+const index = stations.findIndex((s) => s.id === props.station.id)
+const arrived = ref(false)
+watch(
+  active,
+  (now) => {
+    if (now === index) arrived.value = true
+    else if (now === -1) arrived.value = false
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -11,7 +31,7 @@ defineProps<{ station: Station }>()
     <div class="inner">
       <div class="board">
         <h2 :id="`${station.id}-title`">
-          <span class="kanji" lang="ja">{{ station.chapterKanji ?? station.kanji }}</span>
+          <span class="kanji" :class="{ waiting: !reduced && !arrived, arrived: !reduced && arrived }" lang="ja">{{ station.chapterKanji ?? station.kanji }}</span>
           <span class="name">{{ station.title }}</span>
         </h2>
         <div class="band" aria-hidden="true" />
@@ -53,6 +73,21 @@ h2 {
   display: block;
   color: var(--c);
   letter-spacing: 0.02em;
+}
+.kanji.waiting {
+  opacity: 0.32;
+  filter: saturate(0.35);
+}
+.kanji.arrived {
+  animation: board-ignite 0.6s steps(1, end);
+}
+@keyframes board-ignite {
+  0% { opacity: 0.32; filter: saturate(0.35); }
+  18% { opacity: 1; filter: none; }
+  30% { opacity: 0.45; }
+  48% { opacity: 1; }
+  62% { opacity: 0.75; }
+  100% { opacity: 1; }
 }
 .name {
   display: block;

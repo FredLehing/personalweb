@@ -167,6 +167,15 @@ const carWindows = Array.from({ length: 7 }, (_, i) => 12 + i * 19)
   100% { transform: translateX(1500px); }
 }
 
+/* Phones: the tower covers the line except for a sliver each side, so the train would repaint
+   the whole skyline to be barely seen. It waits at the platform, as under reduced motion. */
+@media (max-width: 719px) {
+  .train {
+    animation: none;
+    transform: translateX(240px);
+  }
+}
+
 /* Reduced motion: the train waits at the platform instead of passing. */
 @media (prefers-reduced-motion: reduce) {
   .train {

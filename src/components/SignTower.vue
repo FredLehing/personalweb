@@ -1,27 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import { neonVar, stations } from '@/content/stations'
 import { useJourney } from '@/composables/useJourney'
-import { useReducedMotion } from '@/composables/useReducedMotion'
 
 // The tower's one tall sign, split into one segment per chapter. Each segment is a link to its chapter.
-// At load the segments switch on one by one, like signs coming on at dusk.
+// At load the segments switch on one by one, like signs coming on at dusk. That is pure CSS
+// (380ms + 240ms per segment), so it runs on the same clock as the light each segment throws on
+// the city (the hero's --lit-* in App.vue) and can't drift behind it when the main thread is busy.
 
 const { lit } = useJourney()
-const reduced = useReducedMotion()
-const switchedOn = ref<boolean[]>(stations.map(() => false))
-
-onMounted(() => {
-  if (reduced.value) {
-    switchedOn.value = stations.map(() => true)
-    return
-  }
-  stations.forEach((_, index) => {
-    window.setTimeout(() => {
-      switchedOn.value[index] = true
-    }, 380 + index * 240)
-  })
-})
 </script>
 
 <template>
@@ -30,9 +16,9 @@ onMounted(() => {
       v-for="(station, index) in stations"
       :key="station.id"
       class="seg"
-      :class="{ on: switchedOn[index], lit: lit === station.id }"
+      :class="{ lit: lit === station.id }"
       :href="`#${station.id}`"
-      :style="{ '--c': neonVar(station.color) }"
+      :style="{ '--c': neonVar(station.color), '--i': index }"
     >
       <span class="kanji" aria-hidden="true">{{ station.kanji }}</span>
       <span class="label">{{ station.label }}</span>
@@ -55,6 +41,12 @@ onMounted(() => {
 }
 
 .seg {
+  /* Unlit tube: outline only, no light. Lit: the resting ring, and the colour it throws on the
+     frame and the tower wall around it. */
+  --ring-off: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 30%, transparent);
+  --ring: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent);
+  --spill: 0 0 72px 12px color-mix(in srgb, var(--c) 24%, transparent);
+  position: relative;
   display: grid;
   grid-template-columns: auto auto;
   align-items: center;
@@ -64,31 +56,63 @@ onMounted(() => {
   background: var(--color-sign);
   color: var(--c);
   text-decoration: none;
-  /* Unlit tube: outline only, no light. */
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 30%, transparent);
-  opacity: 0.32;
-  filter: saturate(0.35);
-  transition:
-    filter 0.45s var(--ease-out-expo),
-    box-shadow 0.45s var(--ease-out-expo);
-}
-
-/* Switched on: resting neon. */
-.seg.on {
-  opacity: 1;
+  -webkit-user-select: none;
+  user-select: none;
+  box-shadow: var(--ring), var(--spill);
   filter: saturate(0.8) brightness(0.88);
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent);
-  animation: ignite 0.6s steps(1, end);
+  /* Neon never eases: pointing at a segment flicks it to full in two steps. */
+  transition:
+    filter 120ms steps(2, end),
+    transform 120ms var(--ease-out-expo);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .seg {
+    animation: ignite 0.6s steps(1, end) calc(380ms + var(--i) * 240ms) backwards;
+  }
+}
+@keyframes ignite {
+  0% { opacity: 0.32; filter: saturate(0.35); box-shadow: var(--ring-off); }
+  18% { opacity: 1; filter: saturate(0.8) brightness(0.88); box-shadow: var(--ring), var(--spill); }
+  30% { opacity: 0.45; }
+  48% { opacity: 1; }
+  62% { opacity: 0.75; }
+  100% { opacity: 1; }
 }
 
-/* Pointed at: full brightness. */
-.seg.on:hover,
-.seg.on:focus-visible,
-.seg.on.lit {
-  filter: none;
+/* Pointed at: full brightness, and more light on the building. The extra light lives on its own
+   layer and only its opacity changes, so no large shadow is repainted frame by frame. */
+.seg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
   box-shadow:
     inset 0 0 0 1.5px var(--c),
-    0 0 40px -2px color-mix(in srgb, var(--c) 70%, transparent);
+    0 0 40px -2px color-mix(in srgb, var(--c) 70%, transparent),
+    0 0 96px 20px color-mix(in srgb, var(--c) 26%, transparent);
+  opacity: 0;
+  transition: opacity 120ms steps(2, end);
+}
+.seg:focus-visible,
+.seg.lit {
+  filter: none;
+}
+.seg:focus-visible::after,
+.seg.lit::after {
+  opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .seg:hover {
+    filter: none;
+  }
+  .seg:hover::after {
+    opacity: 1;
+  }
+}
+/* Press feedback, mostly for touch, where the segments are the main navigation. */
+.seg:active {
+  transform: scale(0.97);
 }
 
 .kanji {
@@ -116,44 +140,16 @@ onMounted(() => {
   text-transform: uppercase;
 }
 
-@keyframes ignite {
-  0% { opacity: 0.32; }
-  18% { opacity: 1; }
-  30% { opacity: 0.45; }
-  48% { opacity: 1; }
-  62% { opacity: 0.75; }
-  100% { opacity: 1; }
-}
-
-/* Each lit segment throws its colour onto the frame and the tower wall around it, and throws
-   more of it when pointed at, so the highlight spreads onto the building. On phones the row
-   hangs on the facade too, so it spills the same way, a little tighter. */
-.seg.on {
-  box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent),
-    0 0 72px 12px color-mix(in srgb, var(--c) 24%, transparent);
-}
-.seg.on:hover,
-.seg.on:focus-visible,
-.seg.on.lit {
-  box-shadow:
-    inset 0 0 0 1.5px var(--c),
-    0 0 40px -2px color-mix(in srgb, var(--c) 70%, transparent),
-    0 0 96px 20px color-mix(in srgb, var(--c) 34%, transparent);
-}
+/* Phones: the row hangs on the facade too, so it spills the same way, a little tighter. */
 @media (max-width: 959px) {
-  .seg.on {
-    box-shadow:
-      inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent),
-      0 0 56px 10px color-mix(in srgb, var(--c) 22%, transparent);
+  .seg {
+    --spill: 0 0 56px 10px color-mix(in srgb, var(--c) 22%, transparent);
   }
-  .seg.on:hover,
-  .seg.on:focus-visible,
-  .seg.on.lit {
+  .seg::after {
     box-shadow:
       inset 0 0 0 1.5px var(--c),
       0 0 32px -2px color-mix(in srgb, var(--c) 70%, transparent),
-      0 0 80px 16px color-mix(in srgb, var(--c) 32%, transparent);
+      0 0 80px 16px color-mix(in srgb, var(--c) 24%, transparent);
   }
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { isPlaceholder, profile } from '@/content/profile'
-import { neonVar, stations } from '@/content/stations'
+import { stations } from '@/content/stations'
 import RouteLine from '@/components/RouteLine.vue'
 import SignTower from '@/components/SignTower.vue'
 import SkylineArt from '@/components/SkylineArt.vue'
@@ -106,7 +106,7 @@ function layoutFacade() {
   const stops = ['transparent 0']
   sign.querySelectorAll('.seg').forEach((seg, i) => {
     const box = seg.getBoundingClientRect()
-    const color = stations[i] ? neonVar(stations[i].color) : 'transparent'
+    const color = stations[i] ? `var(--glow-${stations[i].color})` : 'transparent'
     stops.push(`${color} ${box.top - top + 12}px ${box.bottom - top - 12}px`)
   })
   stops.push(`transparent ${signBottom + 115}px`)
@@ -221,12 +221,12 @@ const stackLine = Object.values(profile.stack)
       </div>
 
       <!-- Wet street at the foot of the skyline. Only signs close to the ground throw their colour
-           onto it: on desktop the segments stack, so only the lowest (Contact) reflects; on phones
+           onto it: on desktop the segments stack, so the two lowest (Contact, then Dream) reflect; on phones
            they hang side by side at one height, so all four do. -->
       <div ref="street" class="street" aria-hidden="true">
         <div class="street-grid">
           <div class="refl" :style="{ width: signWidth ? `${signWidth}px` : undefined }">
-            <span v-for="s in stations" :key="s.id" :style="{ '--c': neonVar(s.color) }" />
+            <span v-for="s in stations" :key="s.id" :style="{ '--c': `var(--glow-${s.color})` }" />
           </div>
         </div>
       </div>
@@ -285,7 +285,6 @@ const stackLine = Object.values(profile.stack)
   background: var(--color-action);
   color: var(--color-action-ink);
   font-weight: 600;
-  transition: top 0.2s var(--ease-out-expo);
 }
 .skip:focus {
   top: 16px;
@@ -296,6 +295,59 @@ const stackLine = Object.values(profile.stack)
 }
 
 /* ───────── hero: the night skyline with the sign tower ───────── */
+/* How lit each sign is, 0 (off) to 1 (on). At load these flicker on in step with the signs
+   themselves (the name at 120ms, then each segment at 380ms + 240ms, same stepped curve), and every
+   bit of light a sign throws on the city takes its colour through --glow-*: the edge light, the
+   washes on the side signs, the name's cyan on its face and the wall, and the street reflection.
+   So the building lights up with its signs instead of glowing before they come on. */
+@property --lit-name {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+@property --lit-about {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+@property --lit-work {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+@property --lit-dream {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+@property --lit-contact {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+.hero {
+  --glow-cyan: color-mix(in srgb, var(--color-neon-cyan) calc(var(--lit-name) * 100%), transparent);
+  --glow-pink: color-mix(in srgb, var(--color-neon-pink) calc(var(--lit-about) * 100%), transparent);
+  --glow-amber: color-mix(in srgb, var(--color-neon-amber) calc(var(--lit-work) * 100%), transparent);
+  --glow-violet: color-mix(in srgb, var(--color-neon-violet) calc(var(--lit-dream) * 100%), transparent);
+  --glow-lime: color-mix(in srgb, var(--color-neon-lime) calc(var(--lit-contact) * 100%), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero {
+    animation:
+      lit-name 0.6s steps(1, end) 120ms backwards,
+      lit-about 0.6s steps(1, end) 380ms backwards,
+      lit-work 0.6s steps(1, end) 620ms backwards,
+      lit-dream 0.6s steps(1, end) 860ms backwards,
+      lit-contact 0.6s steps(1, end) 1100ms backwards;
+  }
+}
+/* The signs' ignite curve, from dark (no light thrown) rather than from the unlit tube's dim. */
+@keyframes lit-name { 0% { --lit-name: 0; } 18% { --lit-name: 1; } 30% { --lit-name: 0.45; } 48% { --lit-name: 1; } 62% { --lit-name: 0.75; } 100% { --lit-name: 1; } }
+@keyframes lit-about { 0% { --lit-about: 0; } 18% { --lit-about: 1; } 30% { --lit-about: 0.45; } 48% { --lit-about: 1; } 62% { --lit-about: 0.75; } 100% { --lit-about: 1; } }
+@keyframes lit-work { 0% { --lit-work: 0; } 18% { --lit-work: 1; } 30% { --lit-work: 0.45; } 48% { --lit-work: 1; } 62% { --lit-work: 0.75; } 100% { --lit-work: 1; } }
+@keyframes lit-dream { 0% { --lit-dream: 0; } 18% { --lit-dream: 1; } 30% { --lit-dream: 0.45; } 48% { --lit-dream: 1; } 62% { --lit-dream: 0.75; } 100% { --lit-dream: 1; } }
+@keyframes lit-contact { 0% { --lit-contact: 0; } 18% { --lit-contact: 1; } 30% { --lit-contact: 0.45; } 48% { --lit-contact: 1; } 62% { --lit-contact: 0.75; } 100% { --lit-contact: 1; } }
 .hero {
   position: relative;
   overflow: hidden;
@@ -360,7 +412,9 @@ const stackLine = Object.values(profile.stack)
 .refl {
   grid-column: 2;
   display: flex;
-  gap: 6px;
+  /* Desktop mirrors the sign's foot: the lowest segment nearest the kerb, the next one below it. */
+  flex-direction: column-reverse;
+  gap: 0;
   width: 100px;
   height: 100%;
 }
@@ -370,9 +424,22 @@ const stackLine = Object.values(profile.stack)
   opacity: 0.32;
   filter: blur(6px);
 }
-/* Desktop: only the lowest segment (the last one) is near the ground. */
-.refl span:not(:last-child) {
+/* Desktop: the two lowest segments are near the ground. Contact (lime) is the strong band at the
+   kerb; Dream (violet), one sign higher, throws a shorter, fainter band further out. */
+.refl span:not(:nth-last-child(-n + 2)) {
   display: none;
+}
+.refl span:last-child {
+  flex: 1.5;
+}
+/* The two bands overlap by 8px and add their light (screen), so lime's tail runs into the violet
+   and the violet's head rises into the lime instead of meeting at a line. */
+.refl span:nth-last-child(2) {
+  margin-top: -10px;
+  opacity: 0.22;
+}
+.refl span:nth-last-child(-n + 2) {
+  mix-blend-mode: screen;
 }
 
 h1 {
@@ -538,7 +605,7 @@ h1 {
   height: 230px;
   background: radial-gradient(
     ellipse 100% 50% at 0% 50%,
-    color-mix(in srgb, var(--color-neon-cyan) 13%, transparent),
+    color-mix(in srgb, var(--glow-cyan) 13%, transparent),
     transparent 75%
   );
 }
@@ -763,12 +830,12 @@ h1 {
 .name-sign {
   background: radial-gradient(
     ellipse 70% 62% at 50% 50%,
-    color-mix(in srgb, var(--color-neon-cyan) 9%, var(--color-sign)),
+    color-mix(in srgb, var(--glow-cyan) 9%, var(--color-sign)),
     var(--color-sign) 78%
   );
   box-shadow:
     0 0 0 1px #252b45,
-    inset 0 0 0 1px color-mix(in srgb, var(--color-neon-cyan) 22%, #2a3048);
+    inset 0 0 0 1px color-mix(in srgb, var(--glow-cyan) 22%, #2a3048);
 }
 @media (min-width: 960px) {
   .ph-deco {
@@ -794,20 +861,20 @@ h1 {
     --spill-from: to right;
   }
   .name-sign {
-    --spill: linear-gradient(var(--color-neon-pink) 60%, var(--color-neon-amber));
+    --spill: linear-gradient(var(--glow-pink) 60%, var(--glow-amber));
   }
   .kanban.sub {
     --spill: linear-gradient(
-      var(--color-neon-amber) 8%,
-      var(--color-neon-violet) 32% 58%,
-      var(--color-neon-lime) 80%
+      var(--glow-amber) 8%,
+      var(--glow-violet) 32% 58%,
+      var(--glow-lime) 80%
     );
   }
   .act .plaque {
     --spill: linear-gradient(
-      var(--color-neon-pink) 22%,
-      var(--color-neon-amber) 42% 70%,
-      var(--color-neon-violet) 92%
+      var(--glow-pink) 22%,
+      var(--glow-amber) 42% 70%,
+      var(--glow-violet) 92%
     );
   }
 }
@@ -869,8 +936,10 @@ h1 {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.foot a:hover {
-  color: var(--color-ink);
+@media (hover: hover) and (pointer: fine) {
+  .foot a:hover {
+    color: var(--color-ink);
+  }
 }
 
 /* ───────── phones: the tower is the whole hero ─────────
@@ -1008,10 +1077,10 @@ h1 {
     pointer-events: none;
     background: linear-gradient(
       90deg,
-      var(--color-neon-pink),
-      var(--color-neon-amber) 35%,
-      var(--color-neon-violet) 65%,
-      var(--color-neon-lime)
+      var(--glow-pink),
+      var(--glow-amber) 35%,
+      var(--glow-violet) 65%,
+      var(--glow-lime)
     );
     opacity: 0.16;
     mix-blend-mode: screen;
@@ -1092,10 +1161,19 @@ h1 {
     justify-content: center;
     padding: 0;
   }
-  .refl span:not(:last-child) {
+  .refl {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .refl span:not(:nth-last-child(-n + 2)) {
     display: block;
   }
-  .refl span {
+  .refl span,
+  .refl span:last-child,
+  .refl span:nth-last-child(2) {
+    flex: 1;
+    margin-top: 0;
+    mix-blend-mode: normal;
     opacity: 0.3;
     filter: blur(5px);
   }
@@ -1105,7 +1183,7 @@ h1 {
    leave the entrance and hang off the right wall on two steel brackets, as on desktop. The
    building then runs straight down to the street, and the window grid fills the lower floors.
    Narrower phones keep the entrance: there is only about 46px of city each side. */
-@media (min-width: 720px) and (max-width: 959px) {
+@media (min-width: 720px) and (max-width: 959px) and (min-height: 560px) {
   .act {
     position: absolute;
     top: 56%;
@@ -1151,9 +1229,26 @@ h1 {
 /* Phones: the plaque sits close under the sign row. The gap there is too short for a floor of
    windows, so instead of a strip of blank wall the plaque moves up and the freed height becomes
    windows above the entrance. */
-@media (max-width: 719px) {
+@media (max-width: 719px), (max-width: 959px) and (max-height: 559px) {
   .kanban.sub {
     margin-top: calc(22px - var(--hero-gap));
+  }
+}
+/* Short phones (iPhone SE/8 class): tighten the top of the building so the entrance's buttons
+   clear the Fred Line bar on the first screen. The stack line is the one thing dropped; the
+   intro, the sign row and the windows above the canopy all stay. */
+@media (max-width: 719px) and (max-height: 700px) {
+  .hero-grid {
+    padding-top: 46px;
+  }
+  .name-sign {
+    padding: 10px 12px 12px;
+  }
+  h1 {
+    font-size: 2.6rem;
+  }
+  .stack-line {
+    display: none;
   }
 }
 @media (max-width: 959px) and (prefers-reduced-motion: reduce) {

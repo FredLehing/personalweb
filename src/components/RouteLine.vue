@@ -16,9 +16,17 @@ const stops = computed(() => [
 // Index into `stops` (0 = Start).
 const here = computed(() => active.value + 1)
 
-// Pointing at a stop lights its sign on the tower.
+// Pointing at a stop lights its sign on the tower: a mouse resting on it, or keyboard focus.
+// A tap fires the same enter and focus events but never the leave or blur, so touch would leave
+// the segment lit after the tap; touch and plain-click focus are ignored.
 const point = (station: string | null) => {
   lit.value = station
+}
+const onPointerEnter = (e: PointerEvent, station: string | null) => {
+  if (e.pointerType === 'mouse') point(station)
+}
+const onFocus = (e: FocusEvent, station: string | null) => {
+  if ((e.target as Element).matches(':focus-visible')) point(station)
 }
 </script>
 
@@ -36,9 +44,9 @@ const point = (station: string | null) => {
             :class="{ past: index < here, here: index === here }"
             :href="`#${stop.id}`"
             :aria-current="index === here ? 'location' : undefined"
-            @mouseenter="point(stop.station)"
-            @mouseleave="point(null)"
-            @focus="point(stop.station)"
+            @pointerenter="onPointerEnter($event, stop.station)"
+            @pointerleave="point(null)"
+            @focus="onFocus($event, stop.station)"
             @blur="point(null)"
           >
             <i aria-hidden="true" />
@@ -159,9 +167,13 @@ const point = (station: string | null) => {
   transition: opacity 0.3s var(--ease-out-expo);
 }
 .stop.here .lbl,
-.stop:hover .lbl,
 .stop:focus-visible .lbl {
   opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .stop:hover .lbl {
+    opacity: 1;
+  }
 }
 
 .end {
@@ -186,10 +198,19 @@ const point = (station: string | null) => {
     width: auto;
     height: var(--line-bar);
     flex-direction: row;
-    padding: 0 16px;
+    /* --line-bar includes the home-indicator inset; the stops sit above it. */
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px)
+      max(16px, env(safe-area-inset-left, 0px));
     border-right: 0;
     border-top: 1px solid var(--color-rule);
-    backdrop-filter: blur(10px);
+    /* Near-opaque instead of a backdrop blur: nothing to blur, nothing to repaint on scroll. */
+    background: rgb(11 14 26 / 0.97);
+  }
+  /* The dots stay 18px, but each stop takes a 44px tap. */
+  .stop::after {
+    content: '';
+    position: absolute;
+    inset: -9px;
   }
   .name {
     display: none;
@@ -244,6 +265,9 @@ const point = (station: string | null) => {
     transform: translateX(-50%);
     writing-mode: horizontal-tb;
     font-size: 11px;
+    /* The name arrives with its stop instead of jumping there. `translate` leaves the centring
+       transform alone. */
+    animation: lbl-in 180ms var(--ease-out-expo);
   }
   .stops li:first-child .stop.here .lbl {
     left: 0;
@@ -253,6 +277,12 @@ const point = (station: string | null) => {
     left: auto;
     right: 0;
     transform: none;
+  }
+}
+@keyframes lbl-in {
+  from {
+    opacity: 0;
+    translate: 0 2px;
   }
 }
 </style>

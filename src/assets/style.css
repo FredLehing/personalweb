@@ -37,8 +37,10 @@
 :root {
   /* Width of the fixed Fred Line rail on wide screens (0 on narrow ones, where it becomes a bottom bar). */
   --rail: 0px;
-  --line-bar: 64px;
-  --gutter: clamp(16px, 4.4vw, 64px);
+  /* The bar grows by the home-indicator inset, so its stops sit above it. */
+  --line-bar: calc(64px + env(safe-area-inset-bottom, 0px));
+  /* Never narrower than a landscape notch. */
+  --gutter: max(clamp(16px, 4.4vw, 64px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
   color-scheme: dark;
 }
 
@@ -51,6 +53,8 @@
 
 @layer base {
   html {
+    /* No grey flash on tap; every tappable thing has its own :active state. */
+    -webkit-tap-highlight-color: transparent;
     background: var(--color-night);
     color: var(--color-ink);
     font-family: var(--font-sans);
