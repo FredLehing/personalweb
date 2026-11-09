@@ -1,0 +1,24 @@
+/* Zen Kaku Gothic New, subset to Latin plus only the Japanese characters this site uses (the full
+   family is about 2.3 MB per weight). A kanji added to the page later falls back to a system font
+   until these files are re-subset to include it. Licence: OFL.txt. */
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./zen-kaku-gothic-new-500.subset.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./zen-kaku-gothic-new-700.subset.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('./zen-kaku-gothic-new-900.subset.woff2') format('woff2');
+}
