@@ -73,3 +73,8 @@ __screenshots__/
 .impeccable/
 PRODUCT.md
 DESIGN.md
+
+# AI tooling (local only)
+.claude/
+.agents/
+skills-lock.json

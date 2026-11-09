@@ -3,12 +3,8 @@ import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { isPlaceholder } from '@/content/profile'
 import type { Project } from '@/content/projects'
 
-// A platform screen: an LCD hung from the platform roof on two steel rods, in the tower sign's
-// housing. The departure strip carries the chapter kanji and the project number in the station
-// colour (printed, not neon, so no glow), then the project's name as its heading, and the video's
-// length and state. The name appears once; the text under the screen is the description and facts. Click-to-load: until play, only the YouTube thumbnail
-// loads; play swaps in the youtube-nocookie player (fullscreen allowed). One screen plays at a
-// time; Esc stops it. The text below works without pressing play.
+// Click-to-load: until play, only the YouTube thumbnail loads; play swaps in the youtube-nocookie
+// player. One screen plays at a time, and Esc stops it.
 const props = defineProps<{ project: Project; index: number }>()
 
 const isPlaying = computed(() => nowPlaying.value === props.project.id)
@@ -132,7 +128,6 @@ const nowPlaying = ref<string | null>(null)
     0 30px 60px -20px rgb(0 0 0 / 0.9);
 }
 
-/* Departure strip. */
 .dep {
   display: flex;
   align-items: center;
@@ -153,7 +148,6 @@ const nowPlaying = ref<string | null>(null)
   margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
-/* The project's heading, printed on the strip like a departure board's destination. */
 .ttl {
   min-width: 0;
   overflow: hidden;
@@ -164,7 +158,6 @@ const nowPlaying = ref<string | null>(null)
   color: var(--color-ink);
   letter-spacing: 0.02em;
 }
-/* A label beside the name, not part of it: lighter and muted. */
 .context {
   font-weight: 400;
   color: var(--color-muted);
@@ -188,7 +181,6 @@ const nowPlaying = ref<string | null>(null)
   letter-spacing: 0.06em;
 }
 
-/* The screen: a display, not a sign, so it brightens with a short ease rather than a stepped flick. */
 .panel {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -264,7 +256,6 @@ const nowPlaying = ref<string | null>(null)
   background: radial-gradient(ellipse at 50% 40%, #1a2036, #0b0e1a 70%);
 }
 
-/* Text below the screen. */
 .info {
   display: grid;
   /* The facts column takes what it needs up to 20rem, then the stack pills wrap, so a long stack

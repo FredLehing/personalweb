@@ -1,6 +1,5 @@
 // Single source of truth for everything the page says about Fred.
-// Strings wrapped in [square brackets] are placeholders: the page renders them
-// visibly marked until real content replaces them. Never invent facts here.
+// Strings wrapped in [square brackets] are placeholders and render visibly marked.
 
 export type Layer = 'frontend' | 'backend' | 'data'
 

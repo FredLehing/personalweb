@@ -4,12 +4,7 @@ import { neonVar, stations, type Station } from '@/content/stations'
 import { useJourney } from '@/composables/useJourney'
 import { useReducedMotion } from '@/composables/useReducedMotion'
 
-// One stop on the Fred Line. The heading is a station nameboard: kanji and English name
-// at the same scale over a band in the line colour.
-// The kanji is an unlit tube until the visitor arrives at this station, then it switches on with
-// the signs' stepped flicker and stays on while they travel between chapters. Back at the Start
-// the line resets: every station goes dark (a plain cut, as neon does) and lights again on the
-// next trip down. The English name never dims. Reduced motion: lit from the start.
+// The kanji stays unlit until the visitor arrives and resets back at the Start. Reduced motion: always lit.
 const props = defineProps<{ station: Station }>()
 
 const { active } = useJourney()

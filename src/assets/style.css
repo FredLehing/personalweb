@@ -71,8 +71,7 @@
     padding-bottom: var(--line-bar);
   }
 
-  /* Selecting text relights it in amber neon instead of filling a box behind it,
-     the same treatment the hero name had first. */
+  /* Selecting text relights it in amber neon instead of filling a box behind it. */
   ::selection {
     background: transparent;
     color: var(--color-action);
