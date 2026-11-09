@@ -50,7 +50,7 @@ const year = new Date().getFullYear()
       </ChapterSection>
 
       <ChapterSection :station="projects">
-        <p>Coming soon.</p>
+        <p>These are some of the projects I've worked on, both solo and in a team. Videos of each one are on the way.</p>
         <ol class="projects">
           <li v-for="(p, i) in projectList" :key="p.id">
             <ProjectScreen :project="p" :index="i" />
@@ -59,7 +59,22 @@ const year = new Date().getFullYear()
       </ChapterSection>
 
       <ChapterSection :station="dream">
-        <p>Coming soon.</p>
+        <p>
+          It all started when I first saw <em>The Fast and the Furious: Tokyo Drift</em> when I was young. I was instantly
+          drawn to the bright neon city lights of Tokyo, which also became the inspiration for this website. The sign tower
+          at the top of the page, the kanji on every section and the train line you've been following all come from that.
+        </p>
+        <p>
+          These days the closest I can get is Forza Horizon 6, where you can drive the many holy grails of Japanese car
+          culture past Mount Fuji and go to a car meet at the Daikoku Parking Area. That's where I really noticed the other side of the country, and how the old
+          buildings and torii gates blend into the nature around them.
+        </p>
+        <p>
+          I've never actually been to Japan, so for now all of this is from a distance. That's why this stop is called Dream
+          on the sign. The line on this page ends in Kyoto, and one day I want to make that trip for real: see the neon of
+          Tokyo in person, take the train to Kyoto, walk through a torii gate and try as much of the food as I can along the
+          way.
+        </p>
       </ChapterSection>
 
       <ChapterSection :station="contact">
