@@ -2,10 +2,7 @@
 import { computed } from 'vue'
 import { profile } from '@/content/profile'
 
-// The Contact chapter's job is "get in touch", not "look me up" (the hero already does that).
-// So email is the one primary action here; the profiles follow as quiet text links. The CV is left
-// out: it already sits in the hero's actions, where a recruiter will have taken it.
-// Anything without a target yet is left out of the text links, and email shows a "soon" state.
+// Email is the one primary action here: the hero already covers the profiles and the CV.
 
 const mailto = computed(() => (profile.email ? `mailto:${profile.email}` : null))
 

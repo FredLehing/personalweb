@@ -2,10 +2,8 @@
 import { neonVar, stations } from '@/content/stations'
 import { useJourney } from '@/composables/useJourney'
 
-// The tower's one tall sign, split into one segment per chapter. Each segment is a link to its chapter.
-// At load the segments switch on one by one, like signs coming on at dusk. That is pure CSS
-// (380ms + 240ms per segment), so it runs on the same clock as the light each segment throws on
-// the city (the hero's --lit-* in App.vue) and can't drift behind it when the main thread is busy.
+// Ignition is pure CSS, so it runs on the same clock as the light each segment throws on the city
+// (the hero's --lit-*) and can't drift behind it when the main thread is busy.
 
 const { lit } = useJourney()
 </script>
@@ -41,8 +39,6 @@ const { lit } = useJourney()
 }
 
 .seg {
-  /* Unlit tube: outline only, no light. Lit: the resting ring, and the colour it throws on the
-     frame and the tower wall around it. */
   --ring-off: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 30%, transparent);
   --ring: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 60%, transparent);
   --spill: 0 0 72px 12px color-mix(in srgb, var(--c) 24%, transparent);
@@ -60,7 +56,6 @@ const { lit } = useJourney()
   user-select: none;
   box-shadow: var(--ring), var(--spill);
   filter: saturate(0.8) brightness(0.88);
-  /* Neon never eases: pointing at a segment flicks it to full in two steps. */
   transition:
     filter 120ms steps(2, end),
     transform 120ms var(--ease-out-expo);
@@ -110,7 +105,6 @@ const { lit } = useJourney()
     opacity: 1;
   }
 }
-/* Press feedback, mostly for touch, where the segments are the main navigation. */
 .seg:active {
   transform: scale(0.97);
 }
@@ -128,8 +122,7 @@ const { lit } = useJourney()
     0 0 26px var(--c);
 }
 
-/* A touch of white, like a tube's hot core, keeps the small label readable through the resting
-   dim (pink was 4.47:1 at rest; now 5.3:1, every colour ≥ 4.5:1 lit or at rest). */
+/* A touch of white keeps the small label at 4.5:1 or better through the resting dim. */
 .label {
   color: color-mix(in srgb, var(--c), #fff 15%);
   writing-mode: vertical-rl;
@@ -140,7 +133,6 @@ const { lit } = useJourney()
   text-transform: uppercase;
 }
 
-/* Phones: the row hangs on the facade too, so it spills the same way, a little tighter. */
 @media (max-width: 959px) {
   .seg {
     --spill: 0 0 56px 10px color-mix(in srgb, var(--c) 22%, transparent);

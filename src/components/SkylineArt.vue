@@ -1,8 +1,5 @@
 <script setup lang="ts">
-// The night skyline behind the hero, drawn to read as Tokyo: a faint Tokyo Tower on the horizon,
-// dense office and apartment windows, rooftop water tanks and antennas with slow-blinking red
-// aircraft-warning lights, and an elevated railway with a lit train passing now and then.
-// Everything stays dimmer than the neon sign tower. Decorative only.
+// The decorative night skyline behind the hero.
 
 type Block = { x: number; w: number; top: number }
 type Win = { x: number; y: number; warm: boolean }
@@ -48,7 +45,6 @@ function windows(blocks: Block[], chance: number, seed: number): Win[] {
 const farWindows = windows(far, 0.2, 7)
 const midWindows = windows(mid, 0.16, 11)
 
-// Rooftop furniture on a few of the taller far buildings.
 const tanks = [far[1]!, far[4]!, far[8]!, far[10]!, far[13]!].map((b) => ({ x: b.x + 14, y: b.top }))
 const antennas = [far[3]!, far[6]!, far[8]!, far[12]!].map((b, i) => ({ x: b.x + b.w - 18, y: b.top, h: 34 + (i % 2) * 18 }))
 
@@ -156,7 +152,6 @@ const carWindows = Array.from({ length: 7 }, (_, i) => 12 + i * 19)
   100% { opacity: 1; }
 }
 
-/* The train crosses, then the line stays empty for a while before the next one. */
 .train {
   animation: train-pass 30s linear 2s infinite;
   transform: translateX(-700px);

@@ -1,5 +1,5 @@
 // The Projects chapter (作品): one platform screen per project, in this order.
-// Strings wrapped in [square brackets] are placeholders and render visibly marked. Never invent facts here.
+// Strings wrapped in [square brackets] are placeholders and render visibly marked.
 
 export interface Project {
   id: string

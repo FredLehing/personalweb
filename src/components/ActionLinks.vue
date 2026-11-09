@@ -2,10 +2,8 @@
 import { computed } from 'vue'
 import { profile } from '@/content/profile'
 
-// GitHub, LinkedIn, Download CV. GitHub is pinned as the amber primary action (owner's choice);
-// if it ever has no URL, the first live link takes over so there is always a working next step.
-// Links whose target doesn't exist yet are left out (no "soon" placeholders in the hero), and
-// appear on their own once profile.ts gives them a URL.
+// GitHub is the primary action; if it ever has no URL, the first live link takes over.
+// Links without a target are left out.
 
 defineProps<{ layout?: 'stack' | 'row' }>()
 
@@ -84,7 +82,6 @@ const primaryKey = computed(
      and reads as part of it. */
   background: rgb(11 14 26 / 0.92);
   box-shadow: inset 0 0 0 1px var(--color-rule-strong);
-  /* Colour changes are quick and plain; the press lands inside 120ms. */
   transition:
     background 180ms ease,
     box-shadow 180ms ease,

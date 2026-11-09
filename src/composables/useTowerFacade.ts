@@ -1,12 +1,8 @@
 import { onBeforeUnmount, onMounted, ref, type Ref } from 'vue'
 import { stations } from '@/content/stations'
 
-// The facade, laid out from the live tower because its width and the sign's height follow the
-// viewport. On phones and tablets the same grid fills the wall the plaque and entrance leave free,
-// so a tall screen shows more building instead of a blank wall. Floors are 34px, counted from the top of the tower body (the floor lines in CSS use the
-// same rhythm). Windows are upright panes on a fixed column grid: two columns in the wall either side
-// of the sign, a full row below it, stopping before the street's fade. AC units hang on three floors.
-// The edge light takes each segment's colour at that segment's height.
+// Laid out from the live tower because its width and the sign's height follow the viewport.
+// Floors are 34px, counted from the top of the tower body, matching the floor lines in CSS.
 const FLOOR = 34
 
 type Pane = { x: number; y: number; lit: '' | 'c' | 'w' }

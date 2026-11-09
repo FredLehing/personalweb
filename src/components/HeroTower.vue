@@ -7,10 +7,6 @@ import SignTower from '@/components/SignTower.vue'
 import SkylineArt from '@/components/SkylineArt.vue'
 import ActionLinks from '@/components/ActionLinks.vue'
 
-// The hero: the night skyline, the sign tower with the name and intro plaques on its left, the
-// actions plaque on its right, and the wet street at its foot. On phones it rebuilds into a single
-// building (see the phone section of the styles).
-
 const hero = ref<HTMLElement | null>(null)
 const tower = ref<HTMLElement | null>(null)
 const facade = ref<HTMLElement | null>(null)
@@ -33,17 +29,13 @@ const stackLine = Object.values(profile.stack)
 
     <div class="hero-grid">
       <div class="board">
-        <!-- The name sign is side-mounted to the tower wall by two steel brackets. -->
         <div class="kanban name-sign">
           <span class="kb-deco kb-mount top" aria-hidden="true" />
           <span class="kb-deco kb-mount bot" aria-hidden="true" />
-          <!-- Phones: the name is the rooftop sign, with the mast and aircraft light on top. -->
           <span class="ph-deco ph-mast" aria-hidden="true" />
           <span class="ph-deco ph-beacon" aria-hidden="true" />
           <h1><span class="name-line">Fred</span> <span class="name-line">Lehing</span></h1>
         </div>
-        <!-- The role and stack hang on a plain plaque from the bottom of the name sign. A label, not
-             a paragraph: the About chapter carries the longer introduction. -->
         <div class="kanban plaque sub">
           <span class="kb-deco kb-hang l" aria-hidden="true" />
           <span class="kb-deco kb-hang r" aria-hidden="true" />
@@ -53,11 +45,6 @@ const stackLine = Object.values(profile.stack)
       </div>
 
       <div ref="tower" class="tower" :style="edgeStyle">
-        <!-- Building detail: a stepped crown with the mast and aircraft light on top and two
-             condensers on the roof, floor lines and a grid of windows down the facade, AC units,
-             the sign's transformer box with its conduit, the name's cyan on the wall beside it, and
-             the sign's colours running down both corners. The sign is bolted flat to the facade.
-             All dimmer than the sign. -->
         <div class="tw-deco tw-roof" aria-hidden="true">
           <div class="tw-tier t1">
             <div class="tw-crown-wins">
@@ -93,7 +80,6 @@ const stackLine = Object.values(profile.stack)
       </div>
 
       <div class="act">
-        <!-- The actions sit on a plain, unlit plaque, side-mounted to the tower the same way. -->
         <div class="kanban plaque">
           <span class="kb-deco kb-mount top" aria-hidden="true" />
           <span class="kb-deco kb-mount bot" aria-hidden="true" />
@@ -103,9 +89,6 @@ const stackLine = Object.values(profile.stack)
       </div>
     </div>
 
-    <!-- Wet street at the foot of the skyline. Only signs close to the ground throw their colour
-         onto it: on desktop the segments stack, so the two lowest (Contact, then Dream) reflect; on phones
-         they hang side by side at one height, so all five do. -->
     <div ref="street" class="street" aria-hidden="true">
       <div class="street-grid">
         <div class="refl" :style="{ width: signWidth ? `${signWidth}px` : undefined }">
@@ -118,11 +101,8 @@ const stackLine = Object.values(profile.stack)
 
 <style scoped>
 /* ───────── hero: the night skyline with the sign tower ───────── */
-/* How lit each sign is, 0 (off) to 1 (on). At load these flicker on in step with the signs
-   themselves (the name at 120ms, then each segment at 380ms + 240ms, same stepped curve), and every
-   bit of light a sign throws on the city takes its colour through --glow-*: the edge light, the
-   washes on the side signs, the name's cyan on its face and the wall, and the street reflection.
-   So the building lights up with its signs instead of glowing before they come on. */
+/* How lit each sign is, 0 to 1. These animate in step with the signs, and all the light thrown on
+   the city goes through --glow-*, so the building can't glow before its signs come on. */
 @property --lit-name {
   syntax: '<number>';
   inherits: true;
@@ -290,9 +270,6 @@ h1 {
 .name-line {
   display: block;
 }
-/* At load each line of the name switches on like the signs: a dim unlit tube, then a stepped
-   flicker. "Fred" first, then "Lehing", then the sign segments (380ms + 240ms each) carry on
-   the sequence. Reduced motion: the name is simply on. */
 @media (prefers-reduced-motion: no-preference) {
   .name-line {
     animation: name-ignite 0.6s steps(1, end) 120ms backwards;
@@ -325,7 +302,6 @@ h1 {
 }
 
 .tower {
-  /* Wall between the roof and the top of the sign: room for the transformer box and conduit. */
   --sign-top: 40px;
   position: relative;
   display: flex;
@@ -346,8 +322,6 @@ h1 {
   box-shadow: inset 0 0 0 1px #20263d;
 }
 
-/* Building detail on the tower. Same materials as the skyline (mast steel, #ff4a3d aircraft
-   light with its slow stepped blink, windows at skyline opacity), so the sign stays brightest. */
 .tw-roof {
   position: absolute;
   top: -12px;
@@ -391,7 +365,6 @@ h1 {
   80% { opacity: 1; }
   100% { opacity: 1; }
 }
-/* The sign is bolted flat to the facade: one bolt head in each corner of its frame. */
 .tw-bolts {
   position: absolute;
   inset: var(--sign-top) 0 0;
@@ -403,7 +376,6 @@ h1 {
     var(--bolt) 1px calc(100% - 1px) / 8px 8px no-repeat,
     var(--bolt) calc(100% - 1px) calc(100% - 1px) / 8px 8px no-repeat;
 }
-/* The neon's transformer box under the roof, feeding the sign through a short conduit. */
 .tw-ballast {
   position: absolute;
   top: 7px;
@@ -427,7 +399,6 @@ h1 {
   background: #252b45;
   box-shadow: inset 1px 0 0 #39415f;
 }
-/* The name sign's cyan falling on the stretch of wall that faces it. */
 .tw-spill {
   position: absolute;
   top: calc(50% - 220px);
@@ -440,7 +411,6 @@ h1 {
     transparent 75%
   );
 }
-/* Stepped crown: two setback floors on the roof, the mast and aircraft light on the top one. */
 .tw-tier {
   position: absolute;
   bottom: 100%;
@@ -458,7 +428,6 @@ h1 {
   height: 20px;
   transform: translateX(-50%);
 }
-/* The lower setback's row of windows: upright panes, dark glass unless lit. */
 .tw-crown-wins {
   position: absolute;
   left: 12px;
@@ -482,7 +451,6 @@ h1 {
 .tw-crown-wins .warm {
   background: rgb(255 212 138 / 0.34);
 }
-/* Condenser units standing on the main roof, either side of the crown. */
 .tw-condenser {
   position: absolute;
   bottom: 100%;
@@ -534,8 +502,6 @@ h1 {
     0 0 0 1px #151a2c;
 }
 
-/* Edge light: a 2px line on each corner of the tower, in each segment's colour at that segment's
-   height, blending between them and fading out above and below the sign, with a soft halo. */
 .tw-edge {
   position: absolute;
   top: 0;
@@ -555,7 +521,6 @@ h1 {
 .tw-edge.l.halo { left: calc(-1 * var(--tower-overhang) - 4px); }
 .tw-edge.r.halo { right: calc(-1 * var(--tower-overhang) - 3px); }
 
-/* Floor lines on the tower body: a 1px lip over a 1px shadow line every 34px, quieter than the windows. */
 .tower::before {
   background:
     repeating-linear-gradient(transparent 0 32px, #1b2137 32px 33px, #0b0e19 33px 34px),
@@ -572,10 +537,6 @@ h1 {
   justify-self: start;
 }
 
-/* Signs (kanban) side-mounted to the tower walls by short steel brackets, in the same steel as
-   the tower's own brackets, so the city reads as one material. The name's face is dark: it holds
-   the neon name, it isn't a lightbox, and the plaques are plainer still, so the tower stays the
-   landmark. */
 .kanban {
   /* How far a bracket reaches to the tower wall: whatever the overhang leaves of the gap. */
   --reach: calc(var(--hero-gap) - var(--tower-overhang));
@@ -597,7 +558,6 @@ h1 {
   padding: 20px;
   border-radius: 6px;
 }
-/* Intro plaque: hung from the name sign's bottom edge by two short rods. */
 .kanban.sub {
   --drop: 16px;
   margin-top: var(--drop);
@@ -632,7 +592,6 @@ h1 {
 .kb-hang.l { left: 24%; }
 .kb-hang.r { right: 24%; }
 
-/* Side mounts: a bar from the sign's edge to the tower wall, with a bolt plate at each end. */
 .kb-mount {
   position: absolute;
   width: var(--reach);
@@ -653,11 +612,6 @@ h1 {
 .kb-mount::after { right: 0; }
 .kb-mount.top { top: 24px; }
 .kb-mount.bot { bottom: 24px; }
-/* Light from the neon. The name sign's dark face catches its own cyan behind the letters, and
-   every side sign takes a faint wash, on the edge facing the tower, from the segments level
-   with it (top to bottom: pink About, amber Work, vermilion Projects, violet Dream, lime Contact). Screen-blended,
-   so text only gets lighter. The side-sign washes are desktop only; phones have their own
-   (see the phone section). */
 .name-sign {
   background: radial-gradient(
     ellipse 70% 62% at 50% 50%,
@@ -681,7 +635,6 @@ h1 {
     background: var(--spill);
     opacity: 0.16;
     mix-blend-mode: screen;
-    /* Light falls off fast: strongest on the rim facing the tower, gone a third of the way in. */
     -webkit-mask-image: linear-gradient(var(--spill-from), #000, rgb(0 0 0 / 0.35) 12%, transparent 36%);
     mask-image: linear-gradient(var(--spill-from), #000, rgb(0 0 0 / 0.35) 12%, transparent 36%);
   }
@@ -712,9 +665,7 @@ h1 {
   }
 }
 
-/* Name sign: the tower is on its right. */
 .board .kb-mount { right: calc(-1 * (var(--rim) + var(--reach))); }
-/* Actions plaque: the tower is on its left. */
 .plaque .kb-mount { left: calc(-1 * (var(--rim) + var(--reach))); }
 
 /* The status line sets the plaque's width; the buttons fill it instead of leaving a dark gap. */
@@ -733,10 +684,7 @@ h1 {
 }
 
 /* ───────── phones: the tower is the whole hero ─────────
-   Top to bottom: the name as a rooftop sign on steel legs, the roof, the five segments as one
-   sign bolted across the facade, the intro on a plaque, and the actions at street level under a
-   canopy, like the building's entrance. The street reflects all five segments. The DOM order
-   stays name, intro, sign, actions; `order` rebuilds the building without moving the markup. */
+   The DOM order stays name, intro, sign, actions; `order` rebuilds the building without moving the markup. */
 @media (max-width: 959px) {
   .hero {
     min-height: 0;
@@ -760,7 +708,6 @@ h1 {
     font-size: clamp(3rem, 7.4vw, 4rem);
   }
 
-  /* Rooftop sign (屋上看板): the name, on a lattice of steel legs standing on the roof. */
   .name-sign {
     order: 1;
     width: calc(var(--tw) - 8px);
@@ -813,7 +760,6 @@ h1 {
     animation: tw-beacon 3.2s steps(1, end) infinite;
   }
 
-  /* The tower: roof, transformer box and the sign row, with the body running down to the street. */
   .tower {
     --sign-top: 28px;
     order: 2;
@@ -835,7 +781,6 @@ h1 {
     inset: var(--sign-top) 8px 0;
   }
 
-  /* The intro plaque, bolted to the facade under the sign. Its top edge catches the row's light. */
   .kanban.sub {
     order: 3;
     z-index: 1;
@@ -845,7 +790,6 @@ h1 {
     margin-bottom: 26px;
     padding: 14px 12px 16px;
   }
-  /* Bolted like the sign row above it: a bolt head in each corner of the rim. */
   .kanban.sub::before {
     content: '';
     position: absolute;
@@ -941,7 +885,6 @@ h1 {
     text-align: center;
   }
 
-  /* The wet street, above the Fred Line bar: all five segments reflect. */
   .street {
     height: calc(66px + var(--line-bar));
     padding-top: 22px;

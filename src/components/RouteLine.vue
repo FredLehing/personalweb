@@ -215,7 +215,6 @@ const onFocus = (e: FocusEvent, station: string | null) => {
   .name {
     display: none;
   }
-  /* Terminus sits at the end of the bar, like the last stop on a route sign. */
   .end {
     flex: none;
     margin-left: 14px;
