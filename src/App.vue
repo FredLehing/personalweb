@@ -29,20 +29,26 @@ const year = new Date().getFullYear()
     <main>
       <ChapterSection :station="about">
         <p>
-          <strong>I'm a full-stack developer with a project manager's view of the product.</strong> My background is in
-          operations and project management. Because of this, I think about the full product lifecycle, from planning
-          to launch and maintenance.
+          Before I started programming, I worked in operations and project management. That's still how I approach
+          things: I want to understand what we're building and why before I start writing code.
         </p>
         <p>
-          My interest in technology started when I built my first very own PC. I chose every part myself. At
-          Sportradar, I worked closely with developers. Their work made me want to build software. Then I completed the
-          Vali IT! retraining program.
+          The same goes for the code itself. I try to understand every line I write and learn from it as I go, because
+          I'm the one who has to own it, explain it and fix it later.
         </p>
         <p>
-          I like products that are well planned, intuitive and efficient. I also want them to be maintainable. I enjoy
-          planning a feature before I write the code.
+          It started when I was about 18 and built my own PC, the personal desktop I'd never had. Years later at
+          Sportradar I worked alongside developers and learned to read API endpoints properly, something I had never
+          done before. That made me curious about how the software behind them is built.
         </p>
-        <p>In my free time, I play basketball and do endurance sports. I also enjoy video games.</p>
+        <p>
+          So I went to learn programming at the Vali IT! course. During the course I built a working prototype for BCS,
+          and later I joined them as an intern. That's where I'm building my first production product now.
+        </p>
+        <p>
+          Outside work I love basketball, cycling, swimming and running. When I game, it's mostly MMOs: Old School
+          RuneScape, and lately World of Warcraft: Forever.
+        </p>
       </ChapterSection>
 
       <ChapterSection :station="work">
