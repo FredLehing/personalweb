@@ -66,6 +66,19 @@ const nowPlaying = ref<string | null>(null)
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" /></svg>
           </button>
         </template>
+        <template v-else-if="project.image">
+          <img
+            class="shot"
+            :src="project.image"
+            :alt="project.imageAlt ?? ''"
+            loading="lazy"
+            decoding="async"
+            width="1600"
+            height="900"
+          />
+          <a v-if="project.self" class="chip here" href="#top"><span lang="ja">現在地</span> · You are here</a>
+          <span v-else class="chip">Video coming soon</span>
+        </template>
         <span v-else class="empty">[video coming]</span>
       </div>
     </div>
@@ -237,6 +250,46 @@ const nowPlaying = ref<string | null>(null)
 }
 .panel:has(.play:focus-visible) .thumb {
   filter: none;
+}
+.shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.chip {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-ink);
+  background: rgb(5 7 14 / 0.82);
+  box-shadow: inset 0 0 0 1px var(--color-rule-strong);
+  backdrop-filter: blur(6px);
+}
+.here {
+  color: var(--color-action);
+  text-decoration: none;
+  transition:
+    color 180ms ease,
+    transform 120ms var(--ease-out-expo);
+}
+.here:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .here:hover {
+    color: var(--color-action-hover);
+  }
+}
+.here:focus-visible {
+  color: var(--color-action-hover);
 }
 .player {
   position: absolute;
