@@ -18,20 +18,29 @@ export interface Project {
   duration: string | null
   /** Whether the video has captions (shows the CC chip and asks the player to load them). */
   captions: boolean
+  /** Screenshot under public/, shown on the screen while there's no video, or null. */
+  image: string | null
+  /** Alt text for the screenshot. */
+  imageAlt?: string
+  /** True for this site itself: the screen points back up the page instead of promising a video. */
+  self?: boolean
 }
 
 export const projects: Project[] = [
   {
     id: 'personalweb',
-    title: 'This site, the Fred Line',
+    title: 'The Fred Line',
     summary:
-      'A developer home page as one Tokyo night: a neon sign tower for navigation and a train line to Kyoto for scroll progress.',
+      'My personal website as one Tokyo night: a neon sign tower for navigation and a train line to Kyoto for scroll progress.',
     role: 'Design and build',
     stack: ['Vue', 'TypeScript', 'Tailwind CSS'],
     repo: 'https://github.com/FredLehing/personalweb',
     youtubeId: null,
     duration: null,
     captions: false,
+    image: '/projects/personalweb.png',
+    imageAlt: 'The top of this site: a neon sign tower over a Tokyo skyline at night.',
+    self: true,
   },
   {
     id: 'bcs-koolitused',
@@ -45,5 +54,7 @@ export const projects: Project[] = [
     youtubeId: null,
     duration: null,
     captions: false,
+    image: '/projects/bcs-koolitused.png',
+    imageAlt: 'The BCS Koolitused prototype home page, with a training search and a featured partner banner.',
   },
 ]

@@ -56,7 +56,7 @@ const year = new Date().getFullYear()
       </ChapterSection>
 
       <ChapterSection :station="projects">
-        <p>These are some of the projects I've worked on, both solo and in a team. Videos of each one are on the way.</p>
+        <p>These are some of the projects I've worked on, both solo and in a team.</p>
         <ol class="projects">
           <li v-for="(p, i) in projectList" :key="p.id">
             <ProjectScreen :project="p" :index="i" />
